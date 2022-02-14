@@ -58,14 +58,14 @@ df_pulito$cp <- as.factor(df_pulito$cp)                 # tipologia di dolore al
 # -- Value 3: non-anginal pain == dolore generico
 # -- Value 4: asymptomatic == asintomatico             
 df_pulito$trestbps <- as.numeric(df_pulito$trestbps)    # pressione sanquigna a riposo in mm Hg
-df_pulito$fbs <- as.numeric(df_pulito$fbs)              # (insulina > 120 mg/dl) (1 = true; 0 = false)
+df_pulito$fbs <- as.factor(df_pulito$fbs)              # (insulina > 120 mg/dl) (1 = true; 0 = false)
 df_pulito$restecg <- as.factor(df_pulito$restecg)       # ecg a riposo (elettrocardiogramma)
 # -- Value 0: normal == normale
 # -- Value 1: having ST-T wave abnormality (T wave inversions and/or ST elevation or depression of > 0.05 mV) == anormale
 # -- Value 2: showing probable or definite left ventricular hypertrophy by Estes' criteria == ipertrofia ventricolare sx
 df_pulito$thalach <- as.numeric(df_pulito$thalach)      # massima frequenza cardiaca archiviata
-df_pulito$exang <- as.numeric(df_pulito$exang)          # esercizi per il dolore al petto (1 = yes; 0 = no)
-                                          # oldpeak     # Depressione ST indotta dall'esercizio rispetto al riposo
+df_pulito$exang <- as.factor(df_pulito$exang)           # esercizi per il dolore al petto (1 = yes; 0 = no)
+# oldpeak     # Depressione ST indotta dall'esercizio rispetto al riposo
 df_pulito$slope <- as.factor(df_pulito$slope)           # la pendenza del segmento ST di picco di esercizio
 # -- Value 1: upsloping == salita
 # -- Value 2: flat == piatto
@@ -97,6 +97,12 @@ names(df_pulito)[names(df_pulito) == "target"] <- "obiettivo"            # nomin
 
 levels(df_pulito$sesso)
 levels(df_pulito$sesso) <- c('femmina', 'maschio', 'non specificato')
+
+levels(df_pulito$esercizi)
+levels(df_pulito$esercizi) <- c('no', 'si')
+
+levels(df_pulito$insulina)
+levels(df_pulito$insulina) <- c('falso', 'vero')
 
 levels(df_pulito$dolore_petto)
 levels(df_pulito$dolore_petto) <- c('infarto', 'rischio infarto', 'dolore generico', 'asintomatico')
@@ -155,6 +161,28 @@ boxplotX <- function(df, y){
   return (grafico)
 }
 
+
+#---------------------------------------------------------------------
+# ANALISI DEI VALORI DI ETA
+#---------------------------------------------------------------------
+
+print(boxplotX(df_pulito, df_pulito$eta) +
+        ggtitle('Distribuzione eta') +
+        ylab('eta'))
+
+
+eta_valido <- replace(df_pulito$eta, 
+                      df_pulito$eta <= 1 | df_pulito$eta > 122, 
+                      mean(df_pulito$freq_cardiaca > 1 & df_pulito$freq_cardiaca <= 122))
+
+print(boxplotX(df_pulito, eta_valido) +
+        ggtitle('Distribuzione eta') +
+        ylab('eta'))
+
+# viene rimosso il dato insonsistente negativo, l'eta non puo essere 
+# negativa
+
+
 #---------------------------------------------------------------------
 # ANALISI DEI VALORI DELLA PRESSIONE SANGUIGNA
 #---------------------------------------------------------------------
@@ -190,7 +218,7 @@ n_valido2 <- replace(
   df_pulito$freq_cardiaca_max, 
   df_pulito$freq_cardiaca_max <= 1 | df_pulito$freq_cardiaca_max > 222, 
   mean(df_pulito$freq_cardiaca_max[df_pulito$freq_cardiaca_max > 1 &
-      df_pulito$freq_cardiaca_max < 222])
+                                     df_pulito$freq_cardiaca_max < 222])
 )
 
 print(boxplotX(df_pulito, n_valido2) +
@@ -200,25 +228,6 @@ print(boxplotX(df_pulito, n_valido2) +
 # i dati non vengono visulizzati se sono inconsistenti, come valori superiori 
 # a 222 
 
-#---------------------------------------------------------------------
-# ANALISI DEI VALORI DI ETA
-#---------------------------------------------------------------------
-
-print(boxplotX(df_pulito, df_pulito$eta) +
-        ggtitle('Distribuzione eta') +
-        ylab('eta'))
-
-
-eta_valido <- replace(df_pulito$eta, 
-                      df_pulito$eta <= 1 | df_pulito$eta > 122, 
-                      mean(df_pulito$freq_cardiaca > 1 & df_pulito$freq_cardiaca <= 122))
-
-print(boxplotX(df_pulito, eta_valido) +
-        ggtitle('Distribuzione eta') +
-        ylab('eta'))
-
-# viene rimosso il dato insonsistente negativo, l'eta non puo essere 
-# negativa
 
 #---------------------------------------------------------------------
 # ANALISI DEI VALORI DEL COLESTEROLO
@@ -268,7 +277,7 @@ print(boxplotX(df_senza_outlier(df_pulito_so, df_pulito_so$colesterolo),
 # visualizzazione dei grafici analizzati in precedenza senza outlier
 
 #---------------------------------------------------------------------
-# CONTROLLO DEI VALORI DELLA VARIABILE DIFETTO
+# ANALISI DEI VALORI DELLA VARIABILE DIFETTO
 #---------------------------------------------------------------------
 
 print(
@@ -276,17 +285,17 @@ print(
     geom_bar()
 )
 
-levels(df_pulito$difetto)
+levels(df_pulito_so$difetto)
 
 # il numero di livelli di difetto e errato, da descrizione sono solamente 3,
 # pertanto rimuovo il livello errato, il primo con meno elementi
 
-df_pulito$difetto <- as.numeric(df_pulito$difetto)
-df_pulito$difetto[df_pulito$difetto == 1] <- NA 
-df_pulito <- df_pulito %>% 
+df_pulito_so$difetto <- as.numeric(df_pulito_so$difetto)
+df_pulito_so$difetto[df_pulito_so$difetto == 1] <- NA 
+df_pulito_so <- df_pulito_so %>% 
   drop_na()
-df_pulito$difetto <- as.factor(df_pulito$difetto)
-levels(df_pulito$difetto) <- c('normale', 'difetto fisso', 'difetto reversibile')
+df_pulito_so$difetto <- as.factor(df_pulito_so$difetto)
+levels(df_pulito_so$difetto) <- c('normale', 'difetto fisso', 'difetto reversibile')
 
 
 print(
@@ -313,6 +322,22 @@ print(
 )
 
 #---------------------------------------------------------------------
+# ANALISI DEI VALORI DELLA VARIABILE ESERCIZI
+#---------------------------------------------------------------------
+
+print(
+  ggplot(df_pulito_so, aes(esercizi)) + 
+    geom_bar()
+)
+#---------------------------------------------------------------------
+# ANALISI DEI VALORI DELLA VARIABILE ECG RIPOSO
+#---------------------------------------------------------------------
+
+print(
+  ggplot(df_pulito_so, aes(ECG_riposo)) + 
+    geom_bar()
+)
+#---------------------------------------------------------------------
 # ANALISI DEI VALORI DELLA VARIABILE INCLINAZIONE GRAFICO
 #---------------------------------------------------------------------
 
@@ -320,7 +345,22 @@ print(
   ggplot(df_pulito_so, aes(inclinazione_grafico)) + 
     geom_bar()
 )
+#---------------------------------------------------------------------
+# ANALISI DEI VALORI DELLA VARIABILE SESSO
+#---------------------------------------------------------------------
 
+print(
+  ggplot(df_pulito_so, aes(sesso)) + 
+    geom_bar()
+)
+#---------------------------------------------------------------------
+# ANALISI DEI VALORI DELLA VARIABILE OBIETTIVO
+#---------------------------------------------------------------------
+
+print(
+  ggplot(df_pulito_so, aes(obiettivo)) + 
+    geom_bar()
+)
 #---------------------------------------------------------------------
 # ANALISI DEI VALORI DELLA VARIABILE VASI COLORATI
 #---------------------------------------------------------------------
@@ -350,6 +390,13 @@ print(
   ggplot(df_pulito_so, aes(vecchi_picchi)) + 
     geom_density()
 )
+#---------------------------------------------------------------------
+# ANALISI DEI VALORI ID
+#---------------------------------------------------------------------
+# controllo se ci sono duplicati 
+table(df_pulito_so$ID)[table(df_pulito_so$ID) > 1]
+# sostituiamo i valori in modo tale da avere tutti casi distinti e ordinati
+df_pulito_so$ID <- 1:dim(df_pulito_so)[1]
 
 #---------------------------------------------------------------------
 # ANALISI DESCRITTIVA
@@ -367,7 +414,7 @@ print(sex)
 # oltre il 75% del campione esaminato e rappresentato dalla modalita maschio,
 # i pazienti che hanno infarti o soffrono di dolori al petto sono prevalentemente 
 # maschi
-
+#---------------------------------------------------------------------
 
 ## Distribuzione delle eta in base al sesso tramite boxplot
 eta_sex <- ggplot(df_pulito_so, aes(sesso, eta)) + 
@@ -381,12 +428,15 @@ eta_sex <- ggplot(df_pulito_so, aes(sesso, eta)) +
 
 print(eta_sex)
 
-#
-#
-#
-#
-#----------------------------------------------------
-###DA RIVEDERE
+# notiamo come mediamente i pazienti maschili siano piu giovani delle donne
+# notiamo come lo scarto interquartile delle donne e > di quello maschile
+# la persona di sesso NS ha circa 48 anni
+# VAS e VAI femminili si discostano di meno dallo scarto interquartile rispetto 
+# alle registrazioni prese sui maschi
+#---------------------------------------------------------------------
+
+## distribuzione dei pazienti in base al sesso, eta e al tipo di ECG
+
 ecg_eta_sex <- ggplot(df_pulito_so, aes(ECG_riposo, eta, col = sesso)) + 
   geom_boxplot(
     alpha=0.2
@@ -396,9 +446,84 @@ ecg_eta_sex <- ggplot(df_pulito_so, aes(ECG_riposo, eta, col = sesso)) +
 
 print(ecg_eta_sex)
 
-col_pressione <- ggplot(df_pulito_so, aes(ID, colesterolo )) +
-  geom_point()
+# l'eta femminile con un ECG a riposo normale si concentra tra i 50 e i 
+# 60 anni con pochi, la donna piu giovane ha un ECG anormale. lo scarto interquantile
+# femminile di chi registra un ECG anormale e elevato. l'unica donna
+# che soffre di ipretrofia ventricolare sx ha 55 anni circa. 
+# per quanto riguarda gli uomini rileviamo scarti interquantili pittosto ristretti
+# e si aggirano sempre sui 50 - 60 anni per chi ha un ECG normale con molti casi
+# che rientrano al di sotto del Q2. possiamo notare che chi registra un ECG anormale 
+# ha una media di eta minore di chi registra un ECG normale. l'unico caso maschile
+# di ipertrofia registra circa 58 anni.
+# notiamo come la persona di sesso NS ha un ECG normale e circa 48 anni
+#---------------------------------------------------------------------
 
-print(col_pressione)
-#----------------------------------------------------
+## distribuzione delle modalita di dolore al petto per il sesso 
 
+sex_dolore <- ggplot(df_pulito_so, aes(dolore_petto, fill = sesso)) +
+  geom_bar() +
+  facet_grid(vars(sesso)) +
+  ggtitle('Distribuzione dolore al petto per sesso') 
+
+print(sex_dolore)
+
+#
+#
+#
+#---------------------------------------------------------------------
+
+## distribuzione delle modalita di esercizi per il sesso 
+
+sex_esercizi <- ggplot(df_pulito_so, aes(esercizi, fill = sesso)) +
+  geom_bar() +
+  facet_grid(vars(sesso)) +
+  ggtitle('Distribuzione esercizi per sesso') 
+
+print(sex_esercizi)
+#
+#
+#
+#
+#---------------------------------------------------------------------
+
+## distribuzione eta per numero di vasi sanguigni colorati dal fluido di contrasto 
+
+vasi_eta <- ggplot(df_pulito_so, aes(eta, fill = vasi_sang_colorati)) +
+  geom_bar() +
+  facet_grid(vars(vasi_sang_colorati)) +
+  ggtitle('Distribuzione eta per numero di vasi sanguigni colorati') 
+
+print(vasi_eta)
+#
+#
+#
+#
+#---------------------------------------------------------------------
+
+##
+
+vasi_eta_sex <- ggplot(df_pulito_so, aes(eta, fill = sesso)) +
+  geom_bar() +
+  facet_grid(vars(vasi_sang_colorati)) +
+  # da aggiungere la legenda dei vasi sanguigni colorati
+  ggtitle('Distribuzione eta per numero di vasi sanguigni colorati') 
+
+print(vasi_eta_sex)
+#
+#
+#
+#---------------------------------------------------------------------
+
+##
+
+n_classi <- 4
+differenza <- max(df_pulito_so$eta) - min(df_pulito_so$eta)
+elementiXclasse <- differenza/n_classi
+
+eta_col <- ggplot(df_pulito_so, aes(x = '', colesterolo)) +
+  geom_boxplot(data = seq(min(df_pulito_so$eta), max(df_pulito_so$eta), elementiXclasse))
+print(eta_col)
+#
+#
+
+#---------------------------------------------------------------------
