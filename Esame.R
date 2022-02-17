@@ -527,3 +527,28 @@ print(eta_col)
 #
 
 #---------------------------------------------------------------------
+
+reg <- lm(df_pulito_so$eta ~ df_pulito_so$colesterolo)
+grafico_reg <- ggplot(df_pulito_so, aes(eta, colesterolo)) +
+  geom_point() +
+  geom_smooth(method='lm')
+
+print(grafico_reg)
+
+grafico_reg <- ggplot(df_pulito_so, aes(eta, freq_cardiaca_max)) +
+  geom_point() +
+  geom_smooth(method='lm')
+
+print(grafico_reg)
+
+grafico_reg <- ggplot(df_pulito_so, aes(colesterolo, freq_cardiaca_max)) +
+  geom_point() +
+  geom_smooth(method='lm')
+
+print(grafico_reg)
+
+grafico_reg <- ggplot(df_pulito_so, aes(colesterolo, pres_sangue_riposo)) +
+  geom_point() +
+  geom_smooth(method='lm')
+
+print(grafico_reg)
