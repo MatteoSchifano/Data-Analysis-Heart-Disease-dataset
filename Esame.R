@@ -6,7 +6,8 @@
 # carico il dataset nella variabile df
 
 df <- read.csv('esame/heart.csv', header = TRUE, stringsAsFactors = TRUE)
-df <- read.csv('heart.csv', header = TRUE, stringsAsFactors = TRUE)
+f <- file.choose()
+df <- read.csv(f, header = TRUE, stringsAsFactors = TRUE)
 
 ## controllo la struttura di df
 
@@ -467,9 +468,10 @@ sex_dolore <- ggplot(df_pulito_so, aes(dolore_petto, fill = sesso)) +
 
 print(sex_dolore)
 
-#
-#
-#
+# si nota come per le donne soffrano prevalentemente di infarto e dolore
+# generico mentre il numero di uomini che registrano un infarto superano 
+# di molto il numero di uomini che riportano le altre tipologie di dolore
+# la persona di sesso non specificato ha registrato un infarto
 #---------------------------------------------------------------------
 
 ## distribuzione delle modalita di esercizi per il sesso 
@@ -480,24 +482,25 @@ sex_esercizi <- ggplot(df_pulito_so, aes(esercizi, fill = sesso)) +
   ggtitle('Distribuzione esercizi per sesso') 
 
 print(sex_esercizi)
-#
-#
-#
-#
+# dal grafico comprendiamo che le donne sono meno propense a svolgere degli 
+# esercizi per il dolore al petto, gli uomini, nonostante registrino piu non
+# svolge l'esercizio c'e anche una gran quantita che svolge gli esercizi
+# la personadi sesso non specificato ha svolto l'esercizio
 #---------------------------------------------------------------------
 
-## distribuzione eta per numero di vasi sanguigni colorati dal fluido di contrasto 
+## distribuzione dolore petto per esercizi
 
-vasi_eta <- ggplot(df_pulito_so, aes(eta, fill = vasi_sang_colorati)) +
+dolore_esercizi <- ggplot(df_pulito_so, aes(dolore_petto, fill = dolore_petto)) +
   geom_bar() +
-  facet_grid(vars(vasi_sang_colorati)) +
-  ggtitle('Distribuzione eta per numero di vasi sanguigni colorati') 
+  facet_grid(vars(esercizi)) +
+  ggtitle('Dolore petto curato con esercizi') 
 
-print(vasi_eta)
-#
-#
-#
-#
+print(dolore_esercizi)
+
+# comprendiamo che chi svolge esercizi e prevalentemente chi ha registrato un
+# infarto o soffre di un dolore generico. si notano anche tanti infarti e rischi
+# infarto che non vengono curati con esercizi
+
 #---------------------------------------------------------------------
 
 ##
@@ -509,12 +512,17 @@ vasi_eta_sex <- ggplot(df_pulito_so, aes(eta, fill = sesso)) +
   ggtitle('Distribuzione eta per numero di vasi sanguigni colorati') 
 
 print(vasi_eta_sex)
-#
-#
-#
+
+# si nota come le persone che hanno 3 vasi sanguigni colorati siano in netta
+# minoranza, siano prevalentemente maschi e che abbiano una soglia di eta 
+# minima registrata elevata. 
+# si nota come chi registra 0 vasi sanguigni colorati siano in netta
+# maggioranza, siano prevalentemente maschi anche perche sono in maggioranza
+# e un'eta ben distribuita intorno ai valori che si presentano con frequenza
+# maggiore
 #---------------------------------------------------------------------
 
-##
+##  DA RIVEDERE
 
 n_classi <- 4
 differenza <- max(df_pulito_so$eta) - min(df_pulito_so$eta)
@@ -527,28 +535,58 @@ print(eta_col)
 #
 
 #---------------------------------------------------------------------
+# ANALISI RELAZIONE TRA PRESSIONE SANGUIGNA A RIPOSO E COLESTEROLO
+#---------------------------------------------------------------------
 
-reg <- lm(df_pulito_so$eta ~ df_pulito_so$colesterolo)
-grafico_reg <- ggplot(df_pulito_so, aes(eta, colesterolo)) +
-  geom_point() +
-  geom_smooth(method='lm')
+# controllo se le variabili hanno una buona correlazione
+cor(df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo)
 
-print(grafico_reg)
+# y = df_pulito_so$pres_sangue_riposo
+# x = df_pulito_so$colesterolo
 
-grafico_reg <- ggplot(df_pulito_so, aes(eta, freq_cardiaca_max)) +
-  geom_point() +
-  geom_smooth(method='lm')
+## REGRESSIONE LINEARE
+reg <- lm(df_pulito_so$pres_sangue_riposo ~ df_pulito_so$colesterolo)
 
-print(grafico_reg)
+# grafico della regr. lineare 
+plot(df_pulito_so$pres_sangue_riposo ~ df_pulito_so$colesterolo,
+     ylab = 'pressione sangue a riposo (mmHg)', xlab = 'colesterolo (mg/dl)')
+title(main = "Regr.lin tra pressione sangue a riposo e colesterolo")
+abline (reg, col = "red")
 
-grafico_reg <- ggplot(df_pulito_so, aes(colesterolo, freq_cardiaca_max)) +
-  geom_point() +
-  geom_smooth(method='lm')
+# si aggiungono i segmenti
+segments(df_pulito_so$colesterolo, fitted(reg), df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo,
+         col = "blue", lty = 2)
 
-print(grafico_reg)
+# pres_sangue_riposo = 35.9921 + 0.2894 * colesterolo
+summary(reg)
 
-grafico_reg <- ggplot(df_pulito_so, aes(colesterolo, pres_sangue_riposo)) +
-  geom_point() +
-  geom_smooth(method='lm')
+reg2 <- lm(df_pulito_so$pres_sangue_riposo ~ I(df_pulito_so$colesterolo - mean(df_pulito_so$colesterolo)))
 
-print(grafico_reg)
+summary(reg2)
+r <- cor(df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo)
+r
+r^2
+r <- cov(df_pulito_so$pres_sangue_riposo, df_pulito_so$colesterolo) / (sd(df_pulito_so$pres_sangue_riposo) * sd(df_pulito_so$colesterolo))
+r
+r^2
+# analisi dei residui
+plot(reg$fitted, reg$residuals, main = "Residui")
+abline(0, 0)
+# il grafico conferma l'ipotesi di distribuzione casuale dei residui
+
+# distribuzione in quantili confrontabile con quella di una normale
+qqnorm(reg$residuals)
+qqline(reg$residuals)
+
+
+df_pred <- data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162))
+(df_pred)
+predict(reg, df_pred)
+predict(reg, df_pred, interval = "confidence")
+
+
+dim(df_pulito_so)
+
+
+
+
