@@ -251,7 +251,7 @@ print(boxplotX(df_senza_outlier(df_pulito, df_pulito$pres_sangue_riposo),
 
 dim(df_pulito)
 df_pulito_so <- df_senza_outlier(df_pulito, df_pulito$pres_sangue_riposo)
-dim(df_pulito)
+dim(df_pulito_so)
 
 print(boxplotX(df_senza_outlier(df_pulito_so, df_pulito_so$freq_cardiaca_max),
                df_senza_outlier(df_pulito_so, df_pulito_so$freq_cardiaca_max)$freq_cardiaca_max) +
@@ -398,7 +398,7 @@ print(
 table(df_pulito_so$ID)[table(df_pulito_so$ID) > 1]
 # sostituiamo i valori in modo tale da avere tutti casi distinti e ordinati
 df_pulito_so$ID <- 1:dim(df_pulito_so)[1]
-
+df_pulito_so$ID <- as.numeric(df_pulito_so$ID)
 #---------------------------------------------------------------------
 # ANALISI DESCRITTIVA
 #---------------------------------------------------------------------
@@ -541,6 +541,7 @@ print(eta_col)
 # controllo se le variabili hanno una buona correlazione
 cor(df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo)
 
+
 # y = df_pulito_so$pres_sangue_riposo
 # x = df_pulito_so$colesterolo
 
@@ -560,13 +561,12 @@ segments(df_pulito_so$colesterolo, fitted(reg), df_pulito_so$colesterolo, df_pul
 # pres_sangue_riposo = 35.9921 + 0.2894 * colesterolo
 summary(reg)
 
+# stima del modello utilizzando la formula I()
 reg2 <- lm(df_pulito_so$pres_sangue_riposo ~ I(df_pulito_so$colesterolo - mean(df_pulito_so$colesterolo)))
 
 summary(reg2)
+# calcolo della r e R^2
 r <- cor(df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo)
-r
-r^2
-r <- cov(df_pulito_so$pres_sangue_riposo, df_pulito_so$colesterolo) / (sd(df_pulito_so$pres_sangue_riposo) * sd(df_pulito_so$colesterolo))
 r
 r^2
 # analisi dei residui
@@ -578,14 +578,174 @@ abline(0, 0)
 qqnorm(reg$residuals)
 qqline(reg$residuals)
 
-
+# previsione sui dati non presenti nel df
 df_pred <- data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162))
 (df_pred)
-predict(reg, df_pred)
-predict(reg, df_pred, interval = "confidence")
+
+predict(reg, 
+        df_pred = data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162)))
+predict(reg,
+        df_pred = data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162)),
+        interval = "confidence")
 
 
 dim(df_pulito_so)
+
+#---------------------------------------------------------------------
+# ANALISI CON ALGORITMO DEL GRADIENTE
+#---------------------------------------------------------------------
+mse <- function(a, b, x = df_pulito_so$colesterolo, y = df_pulito_so$pres_sangue_riposo) {
+  # previsione del modello
+  prediction <- a + b*x 
+  # distantza tra predizione e osservazione
+  residuals <- y - prediction 
+  # eleviamo al ^2 per evitare la somma pari a zero 
+  squared_residuals <- residuals^2 
+  
+  # media delle distanze quadrate
+  ssr <- mean(squared_residuals)
+  ssr
+}
+compute_gradient <- function(a, b, x = df_pulito_so$colesterolo, y = df_pulito_so$pres_sangue_riposo) {
+  n <- length(y)
+  predictions <- a + (b * x)
+  residuals <- y - predictions
+  
+  da <- (1/n) * sum(-2*residuals)
+  db <- (1/n) * sum(-2*x*residuals)
+  
+  c(da, db)
+}
+gd_step <- function(a, b, 
+                    learning_rate = 0.1, 
+                    x = df_pulito_so$colesterolo, 
+                    y = df_pulito_so$pres_sangue_riposo) {
+  grad <- compute_gradient(a, b, x, y)
+  step_a <- grad[1] * learning_rate
+  step_b <- grad[2] * learning_rate
+  
+  c(a - step_a, b - step_b)
+}
+estimate_gradient <- function(pars_tbl, learning_rate = 0.1, x = df_pulito_so$colesterolo, y = df_pulito_so$pres_sangue_riposo) {
+  
+  pars <- gd_step(pars_tbl[["a"]], pars_tbl[["b"]],
+                  learning_rate)
+  
+  tibble(a = pars[1], b = pars[2], mse = mse(a, b, x, y))
+}
+
+
+# reg <- lm(df_pulito_so$pres_sangue_riposo ~ df_pulito_so$colesterolo)
+
+Sys.time()
+set.seed(2022)
+
+dati <- tibble(x = df_pulito_so$colesterolo, y = df_pulito_so$pres_sangue_riposo)
+dati
+
+# se i due risultati sono uguali possiamo affermare che funziona la funzione
+mse(a = coef(reg)[1], b = coef(reg)[2])
+mean(resid(reg)^2)
+
+# candidate values
+grid <- expand.grid(a = seq(min(dati$x), max(dati$x), 1), 
+                    b = seq(min(dati$y), max(dati$y), 1)) %>% 
+  as_tibble()
+grid
+# candidate values
+mse_grid <- grid %>% 
+  rowwise(a, b) %>% 
+  summarize(mse = mse(a, b), .groups = "drop")
+mse_grid
+
+mse_grid %>% 
+  arrange(mse) %>% 
+  slice(1)
+
+coef(reg)
+
+walk <- gd_step(0, 0)
+walk
+
+for(i in 1:25) {
+  walk <- gd_step(walk[1], walk[2])
+}
+walk
+# initialize
+grad <- estimate_gradient(tibble(a = 0, b = 0))
+
+# loop through
+for(i in 2:50) {
+  grad[i, ] <- estimate_gradient(grad[i - 1, ])
+}
+grad
+
+grad <- grad %>% 
+  rowid_to_column("iteration")
+
+ggplot(grad, aes(iteration, mse)) +
+  geom_line()
+
+ggplot(dati, aes(x, y)) +
+  geom_point() +
+  geom_abline(aes(intercept = a, slope = b),
+              data = grad,
+              color = "gray60",
+              size = 0.3) +
+  geom_abline(aes(intercept = a, slope = b),
+              data = grad[nrow(grad), ],
+              color = "magenta")
+
+library(gganimate)
+anim <- ggplot(grad) +
+  geom_point(aes(x, y), dati) +
+  geom_smooth(aes(x, y), dati,
+              method = "lm", se = FALSE) +
+  geom_abline(aes(intercept = a,
+                  slope = b),
+              color = "#de4f60") +
+  transition_manual(frames = iteration)
+animate(anim)
+#---------------------------------------------------------------------
+# ANALISI CON ALGORITMO FORZA BRUTA
+#---------------------------------------------------------------------
+
+
+
+
+
+#---------------------------------------------------------------------
+# APPLICAZIONE DI UN ALGORITMO DI MACHINE LEARNING
+#---------------------------------------------------------------------
+# carico la libreria per ML
+library(caret)
+# si impostano le variabili x e y
+ml <- df_pulito_so
+#ml[] <- lapply(df_pulito_so, function(x) as.numeric(as.factor(x)))
+
+x <- ml[, c(2, 5, 6, 9, 11, 13)]
+dim(x)
+y <- ml[, 15]
+dim(t(y))
+
+set.seed(2022)
+# create a matrix of 80% of the rows in the original dataset that we can use for training
+training_index <- createDataPartition(y, p = .80, list = FALSE)
+# select 80% of data to training the models
+training_set <- ml[training_index, ]
+nrow(training_set)
+# use the remaining 20% of the data for test
+test_set <- ml[-training_index, ]
+nrow(test_set)
+
+
+seed = set.seed(2022)
+control <- trainControl(method = "cv", number = 10, seed = seed)
+metric <- "Accuracy"
+
+fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "rf")
+
+
 
 
 
