@@ -541,7 +541,6 @@ print(eta_col)
 # controllo se le variabili hanno una buona correlazione
 cor(df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo)
 
-
 # y = df_pulito_so$pres_sangue_riposo
 # x = df_pulito_so$colesterolo
 
@@ -572,24 +571,28 @@ r^2
 # analisi dei residui
 plot(reg$fitted, reg$residuals, main = "Residui")
 abline(0, 0)
-# il grafico conferma l'ipotesi di distribuzione casuale dei residui
+# il grafico conferma l'ipotesi di distribuzione casuale dei residui dato che 
+# dai dati presenti nel grafico non rileviamo pattern e si distribuiscono 
+# uniformemente sia sopra che sotto alla linea tracciata
 
 # distribuzione in quantili confrontabile con quella di una normale
 qqnorm(reg$residuals)
 qqline(reg$residuals)
+# in questo grafico notiamo come vi sia una distribuzione casuale dei
+# residui, poiché i valori sono equidistribuiti intorno alla retta e si distribuiscono
+# sia sopra che sotto
+
+
+reg <- lm(pres_sangue_riposo ~ colesterolo, data = df_pulito_so)
 
 # previsione sui dati non presenti nel df
-df_pred <- data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162))
-(df_pred)
 
-predict(reg, 
-        df_pred = data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162)))
 predict(reg,
-        df_pred = data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162)),
+        newdata = data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162)))
+
+predict(reg,
+        newdata = data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162)),
         interval = "confidence")
-
-
-dim(df_pulito_so)
 
 #---------------------------------------------------------------------
 # ANALISI CON ALGORITMO DEL GRADIENTE
@@ -723,7 +726,7 @@ library(caret)
 ml <- df_pulito_so
 #ml[] <- lapply(df_pulito_so, function(x) as.numeric(as.factor(x)))
 
-x <- ml[, c(2, 5, 6, 9, 11, 13)]
+x <- ml[, c(2, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)]
 dim(x)
 y <- ml[, 15]
 dim(t(y))
