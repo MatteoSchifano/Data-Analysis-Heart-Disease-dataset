@@ -5,7 +5,6 @@
 
 # carico il dataset nella variabile df
 
-df <- read.csv('esame/heart.csv', header = TRUE, stringsAsFactors = TRUE)
 f <- file.choose()
 df <- read.csv(f, header = TRUE, stringsAsFactors = TRUE)
 
@@ -52,7 +51,6 @@ df_pulito$age <- as.numeric(df_pulito$age)              # anni del paziente
 # sesso paziente 
 # -- Value 1: maschio 
 # -- Value 2: femmina
-# -- Value 3: non specificato
 df_pulito$cp <- as.factor(df_pulito$cp)                 # tipologia di dolore al petto: 
 # -- Value 1: typical angina == infarto 
 # -- Value 2: atypical angina == rischi infarto
@@ -74,7 +72,7 @@ df_pulito$slope <- as.factor(df_pulito$slope)           # la pendenza del segmen
 df_pulito$ca <- as.numeric(df_pulito$ca)                # numero di vasi principali (0-3) colorati da fluoroscopia
 df_pulito$chol <- as.numeric(df_pulito$chol)            # tasso di colesterolo in mg/dl
 df_pulito$thal <- as.factor(df_pulito$thal)             # 3 = normale; 6 = difetto fisso; 7 = difetto reversibile
-df_pulito$target <- as.numeric(df_pulito$target)        # obiettivo da predirre
+df_pulito$target <- as.factor(df_pulito$target)        # obiettivo da predirre
 
 
 # 2.3. Rinomino le colonne in modo che siano esplicative
@@ -97,7 +95,16 @@ names(df_pulito)[names(df_pulito) == "target"] <- "obiettivo"            # nomin
 # 2.4. Rinominare e ordinare i livelli dei fattori in maniera appropriata
 
 levels(df_pulito$sesso)
-levels(df_pulito$sesso) <- c('femmina', 'maschio', 'non specificato')
+levels(df_pulito$sesso)[3] <- NA
+apply(is.na(df_pulito), 2, sum)
+df_pulito <- df_pulito %>%
+  drop_na()
+levels(df_pulito$sesso) <- c('femmina', 'maschio')
+levels(df_pulito$sesso)
+# il terzo livello della variabile sesso si decide di eliminarlo poiche 
+# nella descrizione del dataset non è presente il sesso non specificato e 
+# per quanto riguarda un'ospedale vieni classificato o maschio o femmina 
+# per i vari trattamenti
 
 levels(df_pulito$esercizi)
 levels(df_pulito$esercizi) <- c('no', 'si')
@@ -111,8 +118,11 @@ levels(df_pulito$dolore_petto) <- c('infarto', 'rischio infarto', 'dolore generi
 levels(df_pulito$ECG_riposo)
 levels(df_pulito$ECG_riposo) <- c('normale', 'anormale', 'ipertrofia ventr. sx')
 
-levels(df_pulito$inclinamento_grafico)
-levels(df_pulito$inclinamento_grafico) <- c('salita', 'piatto', 'discesa')
+levels(df_pulito$inclinazione_grafico)
+levels(df_pulito$inclinazione_grafico) <- c('salita', 'piatto', 'discesa')
+
+levels(df_pulito$obiettivo)
+levels(df_pulito$obiettivo) <- c('0', '1')
 
 summary(df_pulito)
 
@@ -389,7 +399,7 @@ print(
 
 print(
   ggplot(df_pulito_so, aes(vecchi_picchi)) + 
-    geom_density()
+    geom_bar()
 )
 #---------------------------------------------------------------------
 # ANALISI DEI VALORI ID
@@ -399,6 +409,7 @@ table(df_pulito_so$ID)[table(df_pulito_so$ID) > 1]
 # sostituiamo i valori in modo tale da avere tutti casi distinti e ordinati
 df_pulito_so$ID <- 1:dim(df_pulito_so)[1]
 df_pulito_so$ID <- as.numeric(df_pulito_so$ID)
+
 #---------------------------------------------------------------------
 # ANALISI DESCRITTIVA
 #---------------------------------------------------------------------
@@ -412,9 +423,7 @@ sex <- ggplot(df_pulito_so,  aes(x = "", y = sesso, fill = sesso)) +
   ggtitle('Distribuzione sesso') 
 print(sex)  
 
-# oltre il 75% del campione esaminato e rappresentato dalla modalita maschio,
-# i pazienti che hanno infarti o soffrono di dolori al petto sono prevalentemente 
-# maschi
+# oltre il 75% delle persone esaminate sono maschi,  
 #---------------------------------------------------------------------
 
 ## Distribuzione delle eta in base al sesso tramite boxplot
@@ -431,7 +440,6 @@ print(eta_sex)
 
 # notiamo come mediamente i pazienti maschili siano piu giovani delle donne
 # notiamo come lo scarto interquartile delle donne e > di quello maschile
-# la persona di sesso NS ha circa 48 anni
 # VAS e VAI femminili si discostano di meno dallo scarto interquartile rispetto 
 # alle registrazioni prese sui maschi
 #---------------------------------------------------------------------
@@ -456,7 +464,6 @@ print(ecg_eta_sex)
 # che rientrano al di sotto del Q2. possiamo notare che chi registra un ECG anormale 
 # ha una media di eta minore di chi registra un ECG normale. l'unico caso maschile
 # di ipertrofia registra circa 58 anni.
-# notiamo come la persona di sesso NS ha un ECG normale e circa 48 anni
 #---------------------------------------------------------------------
 
 ## distribuzione delle modalita di dolore al petto per il sesso 
@@ -471,7 +478,7 @@ print(sex_dolore)
 # si nota come per le donne soffrano prevalentemente di infarto e dolore
 # generico mentre il numero di uomini che registrano un infarto superano 
 # di molto il numero di uomini che riportano le altre tipologie di dolore
-# la persona di sesso non specificato ha registrato un infarto
+
 #---------------------------------------------------------------------
 
 ## distribuzione delle modalita di esercizi per il sesso 
@@ -485,7 +492,7 @@ print(sex_esercizi)
 # dal grafico comprendiamo che le donne sono meno propense a svolgere degli 
 # esercizi per il dolore al petto, gli uomini, nonostante registrino piu non
 # svolge l'esercizio c'e anche una gran quantita che svolge gli esercizi
-# la personadi sesso non specificato ha svolto l'esercizio
+
 #---------------------------------------------------------------------
 
 ## distribuzione dolore petto per esercizi
@@ -533,13 +540,98 @@ eta_col <- ggplot(df_pulito_so, aes(x = '', colesterolo)) +
 print(eta_col)
 #
 #
+#---------------------------------------------------------------------
 
+## distribuzione colesterolo per pressione sanguigna a riposo
+pres_col <- ggplot(df_pulito_so, aes(colesterolo, pres_sangue_riposo)) +
+  geom_point() +
+  labs(
+    x = 'colesterolo mg/dl',
+    y = 'pressione sangue a riposo mmHg'
+  ) +
+  ggtitle('Distribuzione colesterolo per pressione sanguigna a riposo') 
+
+
+print(pres_col)
+# i dati si distribuiscono quasi uniformemente nello spazio, con una lieve tendenza
+# a superare i 120 mmHg per i vari valori del colesterolo
+#---------------------------------------------------------------------
+## distribuzione colesterolo per pressione sanguigna a riposo
+pres_col_sex <- ggplot(df_pulito_so, aes(colesterolo, pres_sangue_riposo, col = sesso)) +
+  geom_point() +
+  labs(
+    x = 'colesterolo mg/dl',
+    y = 'pressione sangue a riposo mmHg'
+  ) +
+  facet_grid(vars(sesso)) +
+  ggtitle('Distribuzione colesterolo per pres. sanguigna a riposo diviso per sesso') 
+
+
+print(pres_col_sex)
+# possiamo notare come i valori registrati per le donne potrebbero essere direttamente
+# proporzionali, al crescere della x cresce anche la y,
+# per quanto riguarda i maschi la distribuzione è quasi uniforme nello spazio
+
+#---------------------------------------------------------------------
+## distribuzione eta per pressione sanguigna a riposo
+pres_eta <- ggplot(df_pulito_so, aes(eta, pres_sangue_riposo)) +
+  geom_point() +
+  labs(
+    x = 'eta',
+    y = 'pressione sangue a riposo mmHg'
+  ) +
+  ggtitle('Distribuzione eta per pres. sanguigna a riposo') 
+
+
+print(pres_eta)
+#
+#
+#
+#---------------------------------------------------------------------
+## distribuzione eta per frequenza cardiaca massima
+fcm_eta <- ggplot(df_pulito_so, aes(eta, freq_cardiaca_max)) +
+  geom_point() +
+  labs(
+    x = 'eta',
+    y = 'frequenza cardiaca massima'
+  ) +
+  ggtitle('Distribuzione eta per pres. sanguigna a riposo') 
+
+
+print(fcm_eta)
+#
+#
+#
+#---------------------------------------------------------------------
+## distribuzione colesterolo per frequenza cardiaca massima
+col_fcm <- ggplot(df_pulito_so, aes(colesterolo, freq_cardiaca_max)) +
+  geom_point() +
+  labs(
+    x = 'colesterolo mg/dl',
+    y = 'frequenza cardiaca massima'
+  ) +
+  ggtitle('Distribuzione eta per pres. sanguigna a riposo') 
+
+
+print(col_fcm)
+#
+#
+#
 #---------------------------------------------------------------------
 # ANALISI RELAZIONE TRA PRESSIONE SANGUIGNA A RIPOSO E COLESTEROLO
 #---------------------------------------------------------------------
 
 # controllo se le variabili hanno una buona correlazione
+
 cor(df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo)
+cor(df_pulito_so$eta, df_pulito_so$freq_cardiaca_max)
+cor(df_pulito_so$colesterolo, df_pulito_so$freq_cardiaca_max)
+cor(df_pulito_so$eta, df_pulito_so$pres_sangue_riposo)
+cor(df_pulito_so$colesterolo, df_pulito_so$eta)
+
+# la correlazione è bassa ~10% ma ricordiamo che anche una correlazione alta 
+# non implica casualita, in questo caso avremo a che fare con una relazione con 
+# un alta varianza 
 
 # y = df_pulito_so$pres_sangue_riposo
 # x = df_pulito_so$colesterolo
@@ -699,6 +791,7 @@ ggplot(dati, aes(x, y)) +
               data = grad[nrow(grad), ],
               color = "magenta")
 
+# install.packages('gganimate')
 library(gganimate)
 anim <- ggplot(grad) +
   geom_point(aes(x, y), dati) +
@@ -721,12 +814,16 @@ animate(anim)
 # APPLICAZIONE DI UN ALGORITMO DI MACHINE LEARNING
 #---------------------------------------------------------------------
 # carico la libreria per ML
+# install.packages('caret')
 library(caret)
+
 # si impostano le variabili x e y
 ml <- df_pulito_so
-#ml[] <- lapply(df_pulito_so, function(x) as.numeric(as.factor(x)))
 
-x <- ml[, c(2, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)]
+#---------------------------------------------------------------------
+## Prova 1 tutti gli attributi eccetto ID
+
+x <-  ml[, c(2:15)]
 dim(x)
 y <- ml[, 15]
 dim(t(y))
@@ -735,10 +832,10 @@ set.seed(2022)
 # create a matrix of 80% of the rows in the original dataset that we can use for training
 training_index <- createDataPartition(y, p = .80, list = FALSE)
 # select 80% of data to training the models
-training_set <- ml[training_index, ]
+training_set <- x[training_index, ]
 nrow(training_set)
 # use the remaining 20% of the data for test
-test_set <- ml[-training_index, ]
+test_set <- x[-training_index, ]
 nrow(test_set)
 
 
@@ -746,10 +843,131 @@ seed = set.seed(2022)
 control <- trainControl(method = "cv", number = 10, seed = seed)
 metric <- "Accuracy"
 
-fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "rf")
+
+# linear algorithms
+fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "lda")
+
+## CART
+fit_cart <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "rpart")
+
+## KNN
+fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "knn")
+
+results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
+summary(results)
 
 
 
+#---------------------------------------------------------------------
+## Prova 2 solo valori numerici
+
+x <-  ml[, c(2, 5, 6, 9, 11, 13, 15)]
+dim(x)
+y <- ml[, 15]
+dim(t(y))
+
+set.seed(2022)
+# create a matrix of 80% of the rows in the original dataset that we can use for training
+training_index <- createDataPartition(y, p = .80, list = FALSE)
+# select 80% of data to training the models
+training_set <- x[training_index, ]
+nrow(training_set)
+# use the remaining 20% of the data for test
+test_set <- x[-training_index, ]
+nrow(test_set)
+
+
+seed = set.seed(2022)
+control <- trainControl(method = "cv", number = 10, seed = seed)
+metric <- "Accuracy"
+
+
+# linear algorithms
+fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "lda")
+
+## CART
+fit_cart <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "rpart")
+
+## KNN
+fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "knn")
+
+results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
+summary(results)
 
 
 
+#---------------------------------------------------------------------
+## Prova 3 
+
+x <- ml[, c(2, 3, 4, 5, 6, 7, 8, 10, 13, 15)]
+dim(x)
+y <- ml[, 15]
+dim(t(y))
+
+set.seed(2022)
+# create a matrix of 80% of the rows in the original dataset that we can use for training
+training_index <- createDataPartition(y, p = .80, list = FALSE)
+# select 80% of data to training the models
+training_set <- x[training_index, ]
+nrow(training_set)
+# use the remaining 20% of the data for test
+test_set <- x[-training_index, ]
+nrow(test_set)
+
+
+seed = set.seed(2022)
+control <- trainControl(method = "cv", number = 10, seed = seed)
+metric <- "Accuracy"
+
+
+# linear algorithms
+fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "lda")
+
+## CART
+fit_cart <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "rpart")
+
+## KNN
+fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "knn")
+
+results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
+summary(results)
+
+
+#---------------------------------------------------------------------
+## Prova 4 
+
+x <- ml[, c(2, 3, 4, 5, 6, 7, 8, 10, 13, 15)]
+dim(x)
+y <- ml[, 15]
+dim(t(y))
+
+set.seed(2022)
+# create a matrix of 80% of the rows in the original dataset that we can use for training
+training_index <- createDataPartition(y, p = .80, list = FALSE)
+# select 80% of data to training the models
+training_set <- x[training_index, ]
+nrow(training_set)
+# use the remaining 20% of the data for test
+test_set <- x[-training_index, ]
+nrow(test_set)
+
+
+seed = set.seed(2022)
+control <- trainControl(method = "cv", number = 10, seed = seed)
+metric <- "Accuracy"
+
+
+# linear algorithms
+fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "lda")
+
+## CART
+fit_cart <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "rpart")
+
+## KNN
+fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "knn")
+
+results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
+summary(results)
+
+heatmap(cor(df_pulito_so))
+cor(as.numeric(df_pulito_so))
