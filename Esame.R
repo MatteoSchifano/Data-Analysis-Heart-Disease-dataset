@@ -622,15 +622,18 @@ print(col_fcm)
 #---------------------------------------------------------------------
 
 # controllo se le variabili hanno una buona correlazione
+prova <- df_pulito_so[, c(2, 5, 6, 9, 11, 13)]
 
-cor(df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo)
-cor(df_pulito_so$eta, df_pulito_so$freq_cardiaca_max)
-cor(df_pulito_so$colesterolo, df_pulito_so$freq_cardiaca_max)
-cor(df_pulito_so$eta, df_pulito_so$pres_sangue_riposo)
-cor(df_pulito_so$colesterolo, df_pulito_so$eta)
+# install.packages("ggcorrplot")
+library(ggcorrplot)
+
+ggcorrplot(round(cor(prova), 5))
+# questo grafico mostra le correlazioni tra le diverse variabili numeriche 
+
+cor(df_pulito_so$pres_sangue_riposo, df_pulito_so$colesterolo)
 
 # la correlazione è bassa ~10% ma ricordiamo che anche una correlazione alta 
-# non implica casualita, in questo caso avremo a che fare con una relazione con 
+# non implica casuazione e casualita, in questo caso avremo a che fare con una relazione con 
 # un alta varianza 
 
 # y = df_pulito_so$pres_sangue_riposo
@@ -649,7 +652,8 @@ abline (reg, col = "red")
 segments(df_pulito_so$colesterolo, fitted(reg), df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo,
          col = "blue", lty = 2)
 
-# pres_sangue_riposo = 35.9921 + 0.2894 * colesterolo
+coef(reg)
+# pres_sangue_riposo = 125.60457 + 0.03191 * colesterolo
 summary(reg)
 
 # stima del modello utilizzando la formula I()
@@ -660,6 +664,9 @@ summary(reg2)
 r <- cor(df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo)
 r
 r^2
+# 0.009215276 denota che la varianza dei residui è molto alta e indica un cattivo
+# modello
+
 # analisi dei residui
 plot(reg$fitted, reg$residuals, main = "Residui")
 abline(0, 0)
@@ -680,74 +687,131 @@ reg <- lm(pres_sangue_riposo ~ colesterolo, data = df_pulito_so)
 # previsione sui dati non presenti nel df
 
 predict(reg,
-        newdata = data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162)))
-
-predict(reg,
         newdata = data.frame("colesterolo" = c(105, 112, 12, 53, 145, 19, 41, 152, 160, 162)),
         interval = "confidence")
+
+
+#---------------------------------------------------------------------
+# ANALISI RELAZIONE TRA ETA A FREQUENZA CARDIACA MAX
+#---------------------------------------------------------------------
+
+# controllo se le variabili hanno una buona correlazione
+prova <- df_pulito_so[, c(2, 5, 6, 9, 11, 13)]
+
+# install.packages("ggcorrplot")
+library(ggcorrplot)
+
+ggcorrplot(round(cor(prova), 5))
+# questo grafico mostra le correlazioni tra le diverse variabili numeriche 
+
+cor(df_pulito_so$eta, df_pulito_so$freq_cardiaca_max)
+
+# la correlazione è ~ -30% quindi significa che se il valore di una variabile 
+# aumenta, il valore dell'altra variabile diminuisce.
+
+# y = df_pulito_so$freq_cardiaca_max
+# x = df_pulito_so$eta
+
+## REGRESSIONE LINEARE
+reg <- lm(df_pulito_so$eta ~ df_pulito_so$freq_cardiaca_max)
+
+# grafico della regr. lineare 
+plot(df_pulito_so$eta ~ df_pulito_so$freq_cardiaca_max,
+     xlab = 'frequenza cardiaca max (bpm)', ylab = 'eta')
+title(main = "Regr.lin tra eta e frequenza cardiaca max")
+abline (reg, col = "red")
+
+# si aggiungono i segmenti
+segments(df_pulito_so$freq_cardiaca_max, fitted(reg), df_pulito_so$freq_cardiaca_max, df_pulito_so$eta,
+         col = "blue", lty = 2)
+
+coef(reg)
+# freq_cardiaca_max =  69.14204 - 0.10663 * eta
+summary(reg)
+
+# stima del modello utilizzando la formula I()
+reg2 <- lm(df_pulito_so$eta ~ I(df_pulito_so$freq_cardiaca_max - mean(df_pulito_so$freq_cardiaca_max)))
+
+summary(reg2)
+# calcolo della r e R^2
+r <- cor(df_pulito_so$freq_cardiaca_max, df_pulito_so$eta)
+r
+r^2
+# 0.08572463 denota che la varianza dei residui è molto alta e indica un cattivo
+# modello
+ 
+
+# analisi dei residui
+plot(reg$fitted, reg$residuals, main = "Residui")
+abline(0, 0)
+
+# il grafico conferma l'ipotesi di distribuzione casuale dei residui dato che 
+# dai dati presenti nel grafico non rileviamo pattern e si distribuiscono 
+# uniformemente sia sopra che sotto alla linea tracciata
+
+# distribuzione in quantili confrontabile con quella di una normale
+qqnorm(reg$residuals)
+qqline(reg$residuals)
+# in questo grafico notiamo come vi sia una distribuzione casuale dei
+# residui, poiché i valori sono equidistribuiti intorno alla retta e si distribuiscono
+# sia sopra che sotto
+
+
+reg <- lm(eta ~ freq_cardiaca_max, data = df_pulito_so)
+
+# previsione sui dati non presenti nel df
+
+
+predict(reg, 
+        newdata = data.frame("freq_cardiaca_max" = c(90, 100, 102, 119, 129, 176, 188, 190, 192, 199)), 
+        interval = "confidence")
+
 
 #---------------------------------------------------------------------
 # ANALISI CON ALGORITMO DEL GRADIENTE
 #---------------------------------------------------------------------
-mse <- function(a, b, x = df_pulito_so$colesterolo, y = df_pulito_so$pres_sangue_riposo) {
-  # previsione del modello
+
+n <- 1000
+x <- rnorm(n)
+# freq_cardiaca_max =  69.14204 - 0.10663 * eta
+a <- as.numeric(coef(reg)[1])
+b <- as.numeric(coef(reg)[2])
+e <- 3
+
+y <- a + b*x + rnorm(n, sd = e)
+sim_d <- tibble(x = x, y = y)
+sim_d
+
+ggplot(sim_d, aes(x, y)) +
+  geom_point()
+
+sim_ols <- lm(y ~ x)
+summary(sim_ols)
+
+mse <- function(a, b, x = sim_d$x, y = sim_d$y) {
+  # model prediction, given intercept/slope
   prediction <- a + b*x 
-  # distantza tra predizione e osservazione
+  # distance between prediction & observed
   residuals <- y - prediction 
-  # eleviamo al ^2 per evitare la somma pari a zero 
+  # squared to avoid summation to zero
   squared_residuals <- residuals^2 
+  # sum of squared distances
+  #ssr <- sum(squared_residuals) 
+  #ssr
   
-  # media delle distanze quadrate
+  # average of squared distances
   ssr <- mean(squared_residuals)
   ssr
 }
-compute_gradient <- function(a, b, x = df_pulito_so$colesterolo, y = df_pulito_so$pres_sangue_riposo) {
-  n <- length(y)
-  predictions <- a + (b * x)
-  residuals <- y - predictions
-  
-  da <- (1/n) * sum(-2*residuals)
-  db <- (1/n) * sum(-2*x*residuals)
-  
-  c(da, db)
-}
-gd_step <- function(a, b, 
-                    learning_rate = 0.1, 
-                    x = df_pulito_so$colesterolo, 
-                    y = df_pulito_so$pres_sangue_riposo) {
-  grad <- compute_gradient(a, b, x, y)
-  step_a <- grad[1] * learning_rate
-  step_b <- grad[2] * learning_rate
-  
-  c(a - step_a, b - step_b)
-}
-estimate_gradient <- function(pars_tbl, learning_rate = 0.1, x = df_pulito_so$colesterolo, y = df_pulito_so$pres_sangue_riposo) {
-  
-  pars <- gd_step(pars_tbl[["a"]], pars_tbl[["b"]],
-                  learning_rate)
-  
-  tibble(a = pars[1], b = pars[2], mse = mse(a, b, x, y))
-}
 
+mse(a = coef(sim_ols)[1], b = coef(sim_ols)[2])
 
-# reg <- lm(df_pulito_so$pres_sangue_riposo ~ df_pulito_so$colesterolo)
+mean(resid(sim_ols)^2)
 
-Sys.time()
-set.seed(2022)
-
-dati <- tibble(x = df_pulito_so$colesterolo, y = df_pulito_so$pres_sangue_riposo)
-dati
-
-# se i due risultati sono uguali possiamo affermare che funziona la funzione
-mse(a = coef(reg)[1], b = coef(reg)[2])
-mean(resid(reg)^2)
-
-# candidate values
-grid <- expand.grid(a = seq(min(dati$x), max(dati$x), 1), 
-                    b = seq(min(dati$y), max(dati$y), 1)) %>% 
+grid <- expand.grid(a = seq(60, 80, 0.1), b = seq(-5, 5, 0.1)) %>% 
   as_tibble()
 grid
-# candidate values
+
 mse_grid <- grid %>% 
   rowwise(a, b) %>% 
   summarize(mse = mse(a, b), .groups = "drop")
@@ -757,7 +821,29 @@ mse_grid %>%
   arrange(mse) %>% 
   slice(1)
 
-coef(reg)
+coef(sim_ols)
+
+compute_gradient <- function(a, b, x = sim_d$x, y = sim_d$y) {
+  n <- length(y)
+  predictions <- a + (b * x)
+  residuals <- y - predictions
+  
+  da <- (1/n) * sum(-2*residuals)
+  db <- (1/n) * sum(-2*x*residuals)
+  
+  c(da, db)
+}
+
+gd_step <- function(a, b, 
+                    learning_rate = 0.1, 
+                    x = sim_d$x, 
+                    y = sim_d$y) {
+  grad <- compute_gradient(a, b, x, y)
+  step_a <- grad[1] * learning_rate
+  step_b <- grad[2] * learning_rate
+  
+  c(a - step_a, b - step_b)
+}
 
 walk <- gd_step(0, 0)
 walk
@@ -766,6 +852,15 @@ for(i in 1:25) {
   walk <- gd_step(walk[1], walk[2])
 }
 walk
+
+estimate_gradient <- function(pars_tbl, learning_rate = 0.1, x = sim_d$x, y = sim_d$y) {
+  
+  pars <- gd_step(pars_tbl[["a"]], pars_tbl[["b"]],
+                  learning_rate)
+  
+  tibble(a = pars[1], b = pars[2], mse = mse(a, b, x, y))
+}
+
 # initialize
 grad <- estimate_gradient(tibble(a = 0, b = 0))
 
@@ -781,7 +876,7 @@ grad <- grad %>%
 ggplot(grad, aes(iteration, mse)) +
   geom_line()
 
-ggplot(dati, aes(x, y)) +
+ggplot(sim_d, aes(x, y)) +
   geom_point() +
   geom_abline(aes(intercept = a, slope = b),
               data = grad,
@@ -791,24 +886,165 @@ ggplot(dati, aes(x, y)) +
               data = grad[nrow(grad), ],
               color = "magenta")
 
-# install.packages('gganimate')
+# install.packages("gganimate")
+# install.packages("gifski")
+# install.packages("png")
 library(gganimate)
 anim <- ggplot(grad) +
-  geom_point(aes(x, y), dati) +
-  geom_smooth(aes(x, y), dati,
+  geom_point(aes(x, y), sim_d) +
+  geom_smooth(aes(x, y), sim_d,
               method = "lm", se = FALSE) +
   geom_abline(aes(intercept = a,
                   slope = b),
               color = "#de4f60") +
   transition_manual(frames = iteration)
 animate(anim)
+
+
+
 #---------------------------------------------------------------------
 # ANALISI CON ALGORITMO FORZA BRUTA
 #---------------------------------------------------------------------
 
 
+n <- 1000
+x <- rnorm(n)
+# freq_cardiaca_max =  69.14204 - 0.10663 * eta
+a <- as.numeric(coef(reg)[1])
+b <- as.numeric(coef(reg)[2])
+e <- 3
 
+y <- a + b*x + rnorm(n, sd = e)
+sim_d <- tibble(x = x, y = y)
+sim_d
 
+ggplot(sim_d, aes(x, y)) +
+  geom_point()
+
+sim_ols <- lm(y ~ x)
+summary(sim_ols)
+
+mse <- function(a, b, x = sim_d$x, y = sim_d$y) {
+  # model prediction, given intercept/slope
+  prediction <- a + b*x 
+  # distance between prediction & observed
+  residuals <- y - prediction 
+  # squared to avoid summation to zero
+  squared_residuals <- residuals^2 
+  # sum of squared distances
+  #ssr <- sum(squared_residuals) 
+  #ssr
+  
+  # average of squared distances
+  ssr <- mean(squared_residuals)
+  ssr
+}
+
+mse(a = coef(sim_ols)[1], b = coef(sim_ols)[2])
+
+mean(resid(sim_ols)^2)
+
+grid <- expand.grid(a = seq(60, 80, 0.1), b = seq(-5, 5, 0.1)) %>% 
+  as_tibble()
+grid
+
+mse_grid <- grid %>% 
+  rowwise(a, b) %>% 
+  summarize(mse = mse(a, b), .groups = "drop")
+mse_grid
+
+mse_grid %>% 
+  arrange(mse) %>% 
+  slice(1)
+
+coef(sim_ols)
+
+compute_gradient <- function(a, b, x = sim_d$x, y = sim_d$y) {
+  n <- length(y)
+  predictions <- a + (b * x)
+  residuals <- y - predictions
+  
+  da <- (1/n) * sum(-2*residuals)
+  db <- (1/n) * sum(-2*x*residuals)
+  
+  c(da, db)
+}
+
+gd_step <- function(a, b, 
+                    learning_rate = 0.1, 
+                    x = sim_d$x, 
+                    y = sim_d$y) {
+  grad <- compute_gradient(a, b, x, y)
+  step_a <- grad[1] * learning_rate
+  step_b <- grad[2] * learning_rate
+  
+  c(a - step_a, b - step_b)
+}
+
+walk <- gd_step(0, 0)
+walk
+
+for(i in 1:25) {
+  walk <- gd_step(walk[1], walk[2])
+}
+walk
+
+estimate_gradient <- function(pars_tbl, learning_rate = 0.1, x = sim_d$x, y = sim_d$y) {
+  
+  pars <- gd_step(pars_tbl[["a"]], pars_tbl[["b"]],
+                  learning_rate)
+  
+  tibble(a = pars[1], b = pars[2], mse = mse(a, b, x, y))
+}
+
+# if the difference between mse_old and mse_new is smaller than the epsilon value (or if the maximum number of iterations is reached), then the algorithm will halt
+mse_old <- 0
+mse_new <- .1
+epsilon <- .0005
+iteration <- 50
+
+# initialize
+grad <- estimate_gradient(tibble(a = 0, b = 0))
+
+# loop through
+i <- 2
+while(abs(mse_new - mse_old) > epsilon & i <= iteration) {
+  grad[i, ] <- estimate_gradient(grad[i - 1, ])
+  mse_old <- grad[i - 1, ncol(grad)]
+  mse_new <- grad[i, ncol(grad)]
+  i = i + 1
+}
+grad
+
+grad <- grad %>% 
+  rowid_to_column("iteration")
+
+ggplot(grad, aes(iteration, mse)) +
+  geom_line()
+
+ggplot(sim_d, aes(x, y)) +
+  geom_point() +
+  geom_abline(aes(intercept = a, slope = b),
+              data = grad,
+              color = "gray60",
+              size = 0.3) +
+  geom_abline(aes(intercept = a, slope = b),
+              data = grad[nrow(grad), ],
+              color = "magenta")
+
+#install.packages("gganimate")
+#install.packages("gifski")
+#install.packages("png")
+library(gganimate)
+anim <- ggplot(grad) +
+  geom_point(aes(x, y), sim_d) +
+  geom_smooth(aes(x, y), sim_d,
+              method = "lm", se = FALSE) +
+  geom_abline(aes(intercept = a,
+                  slope = b),
+              color = "#de4f60") +
+  transition_manual(frames = iteration)
+animate(anim)
 
 #---------------------------------------------------------------------
 # APPLICAZIONE DI UN ALGORITMO DI MACHINE LEARNING
@@ -969,5 +1205,3 @@ fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl 
 results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
 summary(results)
 
-heatmap(cor(df_pulito_so))
-cor(as.numeric(df_pulito_so))
