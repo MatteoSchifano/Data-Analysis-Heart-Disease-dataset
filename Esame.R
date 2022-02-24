@@ -189,7 +189,7 @@ print(boxplotX(df_pulito, df_pulito$eta) +
 eta_valido <- replace(df_pulito$eta, 
                       df_pulito$eta < 1 | df_pulito$eta > 122, 
                       mean(df_pulito$eta[df_pulito$eta >= 1 &
-                                         df_pulito$eta <= 122]))
+                                           df_pulito$eta <= 122]))
 
 print(boxplotX(df_pulito, eta_valido) +
         ggtitle('Distribuzione eta') +
@@ -211,7 +211,7 @@ print(boxplotX(df_pulito, df_pulito$press_sangue_riposo) +
 n_valido <- replace(df_pulito$press_sangue_riposo, 
                     df_pulito$press_sangue_riposo <= 0 | df_pulito$press_sangue_riposo > 230, 
                     mean(df_pulito$press_sangue_riposo[df_pulito$press_sangue_riposo >= 1 &
-                                                       df_pulito$press_sangue_riposo <= 230]))
+                                                         df_pulito$press_sangue_riposo <= 230]))
 
 
 print(boxplotX(df_pulito, n_valido)+
@@ -801,7 +801,7 @@ r
 r^2
 # 0.08572463 denota che la varianza dei residui è molto alta e indica un cattivo
 # modello
- 
+
 
 # analisi dei residui
 plot(reg$fitted, reg$residuals, main = "Residui")
@@ -857,7 +857,7 @@ mse <- function(a, b, x = sim_d$x, y = sim_d$y) {
   residuals <- y - prediction 
   # si eleva al quadrato per evitare somme uguali a zero
   squared_residuals <- residuals^2 
- 
+  
   
   # media delle distanze elevata al quadrato
   ssr <- mean(squared_residuals)
@@ -966,96 +966,8 @@ animate(anim)
 # ANALISI CON ALGORITMO FORZA BRUTA
 #---------------------------------------------------------------------
 
-
-n <- 1000
-x <- rnorm(n)
-# freq_cardiaca_max =  69.14204 - 0.10663 * eta
-a <- as.numeric(coef(reg)[1])
-b <- as.numeric(coef(reg)[2])
-e <- 3
-
-y <- a + b*x + rnorm(n, sd = e)
-sim_d <- tibble(x = x, y = y)
-sim_d
-
-ggplot(sim_d, aes(x, y)) +
-  geom_point()
-
-sim_ols <- lm(y ~ x)
-summary(sim_ols)
-
-mse <- function(a, b, x = sim_d$x, y = sim_d$y) {
-  # model prediction, given intercept/slope
-  prediction <- a + b*x 
-  # distance between prediction & observed
-  residuals <- y - prediction 
-  # squared to avoid summation to zero
-  squared_residuals <- residuals^2 
-  # sum of squared distances
-  #ssr <- sum(squared_residuals) 
-  #ssr
-  
-  # average of squared distances
-  ssr <- mean(squared_residuals)
-  ssr
-}
-
-mse(a = coef(sim_ols)[1], b = coef(sim_ols)[2])
-
-mean(resid(sim_ols)^2)
-
-grid <- expand.grid(a = seq(60, 80, 0.1), b = seq(-5, 5, 0.1)) %>% 
-  as_tibble()
-grid
-
-mse_grid <- grid %>% 
-  rowwise(a, b) %>% 
-  summarize(mse = mse(a, b), .groups = "drop")
-mse_grid
-
-mse_grid %>% 
-  arrange(mse) %>% 
-  slice(1)
-
-coef(sim_ols)
-
-compute_gradient <- function(a, b, x = sim_d$x, y = sim_d$y) {
-  n <- length(y)
-  predictions <- a + (b * x)
-  residuals <- y - predictions
-  
-  da <- (1/n) * sum(-2*residuals)
-  db <- (1/n) * sum(-2*x*residuals)
-  
-  c(da, db)
-}
-
-gd_step <- function(a, b, 
-                    learning_rate = 0.1, 
-                    x = sim_d$x, 
-                    y = sim_d$y) {
-  grad <- compute_gradient(a, b, x, y)
-  step_a <- grad[1] * learning_rate
-  step_b <- grad[2] * learning_rate
-  
-  c(a - step_a, b - step_b)
-}
-
-walk <- gd_step(0, 0)
-walk
-
-for(i in 1:25) {
-  walk <- gd_step(walk[1], walk[2])
-}
-walk
-
-estimate_gradient <- function(pars_tbl, learning_rate = 0.1, x = sim_d$x, y = sim_d$y) {
-  
-  pars <- gd_step(pars_tbl[["a"]], pars_tbl[["b"]],
-                  learning_rate)
-  
-  tibble(a = pars[1], b = pars[2], mse = mse(a, b, x, y))
-}
+# l'algoritmo di forza bruta fa riferimento ai dati e al pre processing di questi 
+# ultimi dell'algoritmo del 
 
 # if the difference between mse_old and mse_new is smaller than the epsilon value (or if the maximum number of iterations is reached), then the algorithm will halt
 mse_old <- 0
@@ -1264,4 +1176,3 @@ fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl 
 
 results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
 summary(results)
-
