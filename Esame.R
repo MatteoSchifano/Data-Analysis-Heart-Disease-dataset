@@ -104,7 +104,7 @@ levels(df_pulito$sesso)
 
 # il terzo livello della variabile sesso si decide di eliminarlo poiche 
 # nella descrizione del dataset non è presente il sesso non specificato e 
-# per quanto riguarda un'ospedale vieni classificato o maschio o femmina 
+# negli un ospedale si viene classificati come maschio o femmina 
 # per i vari trattamenti
 
 levels(df_pulito$esercizi)
@@ -304,8 +304,8 @@ print(
 
 levels(df_pulito_so$difetto)
 
-# il numero di livelli di difetto e errato, da descrizione sono solamente 3,
-# pertanto rimuovo il livello errato, il primo, quello con meno elementi
+# il numero di livelli di difetto e errato: da descrizione sono solamente 3,
+# pertanto rimuovo il livello errato, ossia il primo, quello con meno elementi
 
 df_pulito_so$difetto <- as.numeric(df_pulito_so$difetto)
 df_pulito_so$difetto[df_pulito_so$difetto == 1] <- NA 
@@ -405,8 +405,8 @@ print(
              alpha=0.8)
 )
 
-# dato che i vasi sanguigni colorati possono essere solamente 3 i valori superiori
-# vengono eliminati
+# dato che i vasi sanguigni colorati possono essere solamente 3 i valori 
+# superiori a 3 vengono eliminati
 
 df_pulito_so$vasi_sang_colorati[df_pulito_so$vasi_sang_colorati == 4] <- NA
 df_pulito_so <- df_pulito_so %>% 
@@ -451,7 +451,8 @@ sex <- ggplot(df_pulito_so,  aes(x = "", y = sesso, fill = sesso)) +
   ggtitle('Distribuzione sesso') 
 print(sex)  
 
-# oltre il 75% delle persone esaminate sono maschi,  
+# dal grafico si può notare che oltre il 75% delle persone esaminate sono maschi,
+# mentre le donne sono una minoranza
 #---------------------------------------------------------------------
 
 ## Distribuzione delle eta in base al sesso tramite boxplot
@@ -467,7 +468,7 @@ eta_sex <- ggplot(df_pulito_so, aes(sesso, eta)) +
 print(eta_sex)
 
 # notiamo come mediamente i pazienti maschili siano piu giovani delle donne
-# notiamo come lo scarto interquartile delle donne e > di quello maschile
+# lo scarto interquartile delle donne e maggiore di quello maschile
 # VAS e VAI femminili si discostano di meno dallo scarto interquartile rispetto 
 # alle registrazioni prese sui maschi
 #---------------------------------------------------------------------
@@ -483,13 +484,13 @@ ecg_eta_sex <- ggplot(df_pulito_so, aes(ECG_riposo, eta, fill = sesso)) +
 
 print(ecg_eta_sex)
 
-# l'eta femminile con un ECG a riposo normale si concentra tra i 50 e i 
-# 60 anni con pochi, la donna piu giovane ha un ECG anormale. lo scarto interquantile
+# l'eta media femminile con un ECG a riposo normale si concentra tra i 50 e i 
+# 60 anni con pochi; la donna piu giovane ha un ECG anormale. Lo scarto interquantile
 # femminile di chi registra un ECG anormale e elevato. l'unica donna
 # che soffre di ipretrofia ventricolare sx ha 55 anni circa. 
-# per quanto riguarda gli uomini rileviamo scarti interquantili pittosto ristretti
-# e si aggirano sempre sui 50 - 60 anni per chi ha un ECG normale con molti casi
-# che rientrano al di sotto del Q2. possiamo notare che chi registra un ECG anormale 
+# Per quanto riguarda gli uomini rileviamo scarti interquantili pittosto ristretti
+# e la media si aggira sempre sui 50 - 60 anni per chi ha un ECG normale, con molti casi
+# che rientrano al di sotto del Q2. Possiamo notare che chi registra un ECG anormale 
 # ha una media di eta minore di chi registra un ECG normale. l'unico caso maschile
 # di ipertrofia registra circa 58 anni.
 #---------------------------------------------------------------------
@@ -504,7 +505,7 @@ sex_dolore <- ggplot(df_pulito_so, aes(dolore_petto, fill = sesso)) +
 print(sex_dolore)
 
 # si nota come per le donne soffrano prevalentemente di infarto e dolore
-# generico mentre il numero di uomini che registrano un infarto superano 
+# generico mentre il numero di uomini che registrano un infarto supera
 # di molto il numero di uomini che riportano le altre tipologie di dolore
 
 #---------------------------------------------------------------------
@@ -517,9 +518,9 @@ sex_esercizi <- ggplot(df_pulito_so, aes(esercizi, fill = sesso)) +
   ggtitle('Distribuzione esercizi per sesso') 
 
 print(sex_esercizi)
-# dal grafico comprendiamo che le donne sono meno propense a svolgere degli 
-# esercizi per il dolore al petto, gli uomini, nonostante registrino piu non
-# svolge l'esercizio c'e anche una gran quantita che svolge gli esercizi
+# dal grafico comprendiamo che i pazienti, sia donne che uomini,
+# che devono svolgere esercizi sono in minoranza rispetto a chi
+# non li deve svolgere
 
 #---------------------------------------------------------------------
 
@@ -533,7 +534,7 @@ dolore_esercizi <- ggplot(df_pulito_so, aes(dolore_petto, fill = dolore_petto)) 
 print(dolore_esercizi)
 
 # comprendiamo che chi svolge esercizi e prevalentemente chi ha registrato un
-# infarto o soffre di un dolore generico. si notano anche tanti infarti e rischi
+# infarto o soffre di un dolore generico. Si notano anche molti infarti e rischi
 # infarto che non vengono curati con esercizi
 
 #---------------------------------------------------------------------
@@ -549,12 +550,12 @@ vasi_eta_sex <- ggplot(df_pulito_so, aes(eta, fill = sesso)) +
 print(vasi_eta_sex)
 
 # si nota come le persone che hanno 3 vasi sanguigni colorati siano in netta
-# minoranza, siano prevalentemente maschi e che abbiano una soglia di eta 
+# minoranza, siano prevalentemente maschi e abbiano una soglia di eta 
 # minima registrata elevata. 
-# si nota come chi registra 0 vasi sanguigni colorati siano in netta
-# maggioranza, siano prevalentemente maschi anche perche sono in maggioranza
-# e un'eta ben distribuita intorno ai valori che si presentano con frequenza
-# maggiore
+# le persone con 0 vasi sanguigni colorati sono in netta maggioranza,
+# sono prevalentemente maschi e hanno un'eta distribuita
+# intorno ai valori con frequenza maggiore
+
 #---------------------------------------------------------------------
 
 ##  DA RIVEDERE
@@ -567,7 +568,21 @@ eta_col <- ggplot(df_pulito_so, aes(x = '', colesterolo)) +
   geom_boxplot(data = seq(min(df_pulito_so$eta), max(df_pulito_so$eta), elementiXclasse))
 print(eta_col)
 #
-#
+#---------------------------------------------------------------------
+
+## distribuzione sani e malati per eta
+
+target_age <- ggplot(df_pulito_so, aes(eta)) +
+  geom_density(aes(fill = obiettivo), alpha = 0.5) +
+  ggtitle('Distribuzione eta per sani e malati') 
+
+
+print(target_age)
+
+# si nota come, al contrario di quanto si possa pensare, le persone piu anziane siano 
+# quelle che risualtano essere piu sane in linea di massima. La distribuzione delle 
+# persone malate si concentra circa intorno ai 43 e 55 anni, mentre per quanto 
+# riguarda quella dei sani si concentra introno ai 59 anni
 #---------------------------------------------------------------------
 
 ## distribuzione colesterolo per pressione sanguigna a riposo
@@ -586,7 +601,7 @@ print(pres_col)
 #---------------------------------------------------------------------
 ## distribuzione colesterolo per pressione sanguigna a riposo
 pres_col_sex <- ggplot(df_pulito_so, aes(colesterolo, press_sangue_riposo, col = sesso)) +
-  geom_point(col = '#ffa366') +
+  geom_point() +
   labs(
     x = 'colesterolo mg/dl',
     y = 'pressione sangue a riposo mmHg'
@@ -597,7 +612,7 @@ pres_col_sex <- ggplot(df_pulito_so, aes(colesterolo, press_sangue_riposo, col =
 
 print(pres_col_sex)
 # possiamo notare come i valori registrati per le donne potrebbero essere direttamente
-# proporzionali, al crescere della x cresce anche la y,
+# proporzionali, al crescere della x cresce anche la y;
 # per quanto riguarda i maschi la distribuzione è quasi uniforme nello spazio
 
 #---------------------------------------------------------------------
@@ -612,9 +627,9 @@ pres_eta <- ggplot(df_pulito_so, aes(eta, press_sangue_riposo)) +
 
 
 print(pres_eta)
-#
-#
-#
+# dal grafico si deduce che la pressione media è sicuramente superiore ai 120mmHg,
+# con la maggior parte delle persone avente piu di 50 anni
+
 #---------------------------------------------------------------------
 ## distribuzione eta per frequenza cardiaca massima
 fcm_eta <- ggplot(df_pulito_so, aes(eta, freq_cardiaca_max)) +
