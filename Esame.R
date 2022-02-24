@@ -123,7 +123,7 @@ levels(df_pulito$inclinazione_grafico)
 levels(df_pulito$inclinazione_grafico) <- c('salita', 'piatto', 'discesa')
 
 levels(df_pulito$obiettivo)
-levels(df_pulito$obiettivo) <- c('0', '1')
+levels(df_pulito$obiettivo) <- c('sano', 'problema cardiaco')
 
 levels(df_pulito_so$difetto)
 # viene gestito successivamente nell'analisi della variabile
@@ -583,8 +583,23 @@ print(target_age)
 # quelle che risualtano essere piu sane in linea di massima. La distribuzione delle 
 # persone malate si concentra circa intorno ai 43 e 55 anni, mentre per quanto 
 # riguarda quella dei sani si concentra introno ai 59 anni
-#---------------------------------------------------------------------
 
+#---------------------------------------------------------------------
+## distribuzione sani e malati per eta e sesso
+
+target_age_sex <- ggplot(df_pulito_so, aes(eta)) +
+  geom_density(aes(fill = obiettivo), alpha = 0.5) +
+  facet_grid(vars(sesso)) +
+  ggtitle('Distribuzione eta per sani e malati') 
+
+
+print(target_age_sex)
+
+# dal grafico si evince che, con l'aumentare dell'età, le persone
+# tendono ad avere meno patologie cardiache, come già affermato precedentemente.
+# La deifferenza tra sani e malati si può notare soprattutto nel grafico femminile
+
+#---------------------------------------------------------------------
 ## distribuzione colesterolo per pressione sanguigna a riposo
 pres_col <- ggplot(df_pulito_so, aes(colesterolo, press_sangue_riposo)) +
   geom_point(col = '#ffa366') +
@@ -598,6 +613,7 @@ pres_col <- ggplot(df_pulito_so, aes(colesterolo, press_sangue_riposo)) +
 print(pres_col)
 # i dati si distribuiscono quasi uniformemente nello spazio, con una lieve tendenza
 # a superare i 120 mmHg per i vari valori del colesterolo
+
 #---------------------------------------------------------------------
 ## distribuzione colesterolo per pressione sanguigna a riposo
 pres_col_sex <- ggplot(df_pulito_so, aes(colesterolo, press_sangue_riposo, col = sesso)) +
@@ -653,13 +669,16 @@ col_fcm <- ggplot(df_pulito_so, aes(colesterolo, freq_cardiaca_max)) +
     x = 'colesterolo mg/dl',
     y = 'frequenza cardiaca massima'
   ) +
-  ggtitle('Distribuzione eta per pres. sanguigna a riposo') 
+  ggtitle('Distribuzione colesterolo per frequenza cardiaca massima') 
 
 
 print(col_fcm)
-#
-#
-#
+# generalmente si puo affermare che la media delle frequenze
+# si trova al di sopra dei 140 battiti al minuto. Si nota anche
+# che la frequenza cardiaca massima dei pazienti che hanno
+# un'eta compresa tra i 40 e i 50 anni e leggermente superiore a quella
+# dei pazienti piu anziani
+
 #---------------------------------------------------------------------
 # ANALISI RELAZIONE TRA PRESSIONE SANGUIGNA A RIPOSO E COLESTEROLO
 #---------------------------------------------------------------------
@@ -675,9 +694,9 @@ ggcorrplot(round(cor(prova), 5))
 
 cor(df_pulito_so$press_sangue_riposo, df_pulito_so$colesterolo)
 
-# la correlazione è bassa ~10% ma ricordiamo che anche una correlazione alta 
-# non implica casuazione e casualita, in questo caso avremo a che fare con una relazione con 
-# un alta varianza 
+# la correlazione è bassa, circa 10%, ma una correlazione alta 
+# non implica necessariamente casuazione e casualita.   
+# In questo caso si ha a che fare con una relazione con un'alta varianza 
 
 # y = df_pulito_so$press_sangue_riposo
 # x = df_pulito_so$colesterolo
@@ -832,17 +851,15 @@ sim_ols <- lm(y ~ x)
 summary(sim_ols)
 
 mse <- function(a, b, x = sim_d$x, y = sim_d$y) {
-  # model prediction, given intercept/slope
+  # si calcola la predizione
   prediction <- a + b*x 
-  # distance between prediction & observed
+  # distanza tra la predizione e i risultati osservati
   residuals <- y - prediction 
-  # squared to avoid summation to zero
+  # si eleva al quadrato per evitare somme uguali a zero
   squared_residuals <- residuals^2 
-  # sum of squared distances
-  #ssr <- sum(squared_residuals) 
-  #ssr
+ 
   
-  # average of squared distances
+  # media delle distanze elevata al quadrato
   ssr <- mean(squared_residuals)
   ssr
 }
