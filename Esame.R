@@ -57,14 +57,14 @@ df_pulito$cp <- as.factor(df_pulito$cp)                 # tipologia di dolore al
 # -- Value 3: non-anginal pain == dolore generico
 # -- Value 4: asymptomatic == asintomatico             
 df_pulito$trestbps <- as.numeric(df_pulito$trestbps)    # pressione sanquigna a riposo in mm Hg
-df_pulito$fbs <- as.factor(df_pulito$fbs)              # (insulina > 120 mg/dl) (1 = true; 0 = false)
+df_pulito$fbs <- as.factor(df_pulito$fbs)               # (insulina > 120 mg/dl) (1 = true; 0 = false)
 df_pulito$restecg <- as.factor(df_pulito$restecg)       # ecg a riposo (elettrocardiogramma)
-# -- Value 0: normal == normale
-# -- Value 1: having ST-T wave abnormality (T wave inversions and/or ST elevation or depression of > 0.05 mV) == anormale
-# -- Value 2: showing probable or definite left ventricular hypertrophy by Estes' criteria == ipertrofia ventricolare sx
+# -- Value 0: normale
+# -- Value 1: anormale
+# -- Value 2: ipertrofia ventricolare sx
 df_pulito$thalach <- as.numeric(df_pulito$thalach)      # massima frequenza cardiaca archiviata
 df_pulito$exang <- as.factor(df_pulito$exang)           # esercizi per il dolore al petto (1 = yes; 0 = no)
-# oldpeak     # Depressione ST indotta dall'esercizio rispetto al riposo
+# oldpeak                                               # Depressione ST indotta dall'esercizio rispetto al riposo
 df_pulito$slope <- as.factor(df_pulito$slope)           # la pendenza del segmento ST di picco di esercizio
 # -- Value 1: upsloping == salita
 # -- Value 2: flat == piatto
@@ -72,25 +72,25 @@ df_pulito$slope <- as.factor(df_pulito$slope)           # la pendenza del segmen
 df_pulito$ca <- as.numeric(df_pulito$ca)                # numero di vasi principali (0-3) colorati da fluoroscopia
 df_pulito$chol <- as.numeric(df_pulito$chol)            # tasso di colesterolo in mg/dl
 df_pulito$thal <- as.factor(df_pulito$thal)             # 3 = normale; 6 = difetto fisso; 7 = difetto reversibile
-df_pulito$target <- as.factor(df_pulito$target)        # obiettivo da predirre
-
+df_pulito$target <- as.factor(df_pulito$target)         # obiettivo da predirre
 
 # 2.3. Rinomino le colonne in modo che siano esplicative
-names(df_pulito)[names(df_pulito) == "x"] <- "ID"                        # nominale
-names(df_pulito)[names(df_pulito) == "age"] <- "eta"                     # intervallo
-names(df_pulito)[names(df_pulito) == "cp"] <- "dolore_petto"             # nominale o ordinale
-names(df_pulito)[names(df_pulito) == "trestbps"] <- "pres_sangue_riposo" # intervallo                  
-names(df_pulito)[names(df_pulito) == "sex"] <- "sesso"                   # nominale
-names(df_pulito)[names(df_pulito) == "fbs"] <- "insulina"                # 
-names(df_pulito)[names(df_pulito) == "restecg"] <- "ECG_riposo"          # nominale
-names(df_pulito)[names(df_pulito) == "thalach"] <- "freq_cardiaca_max"   # intervallo
-names(df_pulito)[names(df_pulito) == "chol"] <- "colesterolo"            # intervallo
-names(df_pulito)[names(df_pulito) == "exang"] <- "esercizi"              # nominale
-names(df_pulito)[names(df_pulito) == "oldpeak"] <- "vecchi_picchi"       # raporto ???
-names(df_pulito)[names(df_pulito) == "slope"] <- "inclinazione_grafico"  # nominale
-names(df_pulito)[names(df_pulito) == "ca"] <- "vasi_sang_colorati"       # ordinale
-names(df_pulito)[names(df_pulito) == "thal"] <- "difetto"                # 
-names(df_pulito)[names(df_pulito) == "target"] <- "obiettivo"            # nominale
+
+names(df_pulito)[names(df_pulito) == "x"] <- "ID"                         # NOMINALE 
+names(df_pulito)[names(df_pulito) == "age"] <- "eta"                      # INTERVALLO  
+names(df_pulito)[names(df_pulito) == "cp"] <- "dolore_petto"              # ORDINALE 
+names(df_pulito)[names(df_pulito) == "trestbps"] <- "press_sangue_riposo" # INTERVALLO                  
+names(df_pulito)[names(df_pulito) == "sex"] <- "sesso"                    # NOMINALE
+names(df_pulito)[names(df_pulito) == "fbs"] <- "insulina"                 # NOMINALE
+names(df_pulito)[names(df_pulito) == "restecg"] <- "ECG_riposo"           # NOMINALE 
+names(df_pulito)[names(df_pulito) == "thalach"] <- "freq_cardiaca_max"    # INTERVALLO
+names(df_pulito)[names(df_pulito) == "chol"] <- "colesterolo"             # INTERVALLO
+names(df_pulito)[names(df_pulito) == "exang"] <- "esercizi"               # NOMINALE
+names(df_pulito)[names(df_pulito) == "oldpeak"] <- "vecchi_picchi"        # RAPPORTO
+names(df_pulito)[names(df_pulito) == "slope"] <- "inclinazione_grafico"   # NOMINALE
+names(df_pulito)[names(df_pulito) == "ca"] <- "vasi_sang_colorati"        # ORDINALE
+names(df_pulito)[names(df_pulito) == "thal"] <- "difetto"                 # NOMINALE
+names(df_pulito)[names(df_pulito) == "target"] <- "obiettivo"             # NOMINALE
 
 # 2.4. Rinominare e ordinare i livelli dei fattori in maniera appropriata
 
@@ -101,6 +101,7 @@ df_pulito <- df_pulito %>%
   drop_na()
 levels(df_pulito$sesso) <- c('femmina', 'maschio')
 levels(df_pulito$sesso)
+
 # il terzo livello della variabile sesso si decide di eliminarlo poiche 
 # nella descrizione del dataset non è presente il sesso non specificato e 
 # per quanto riguarda un'ospedale vieni classificato o maschio o femmina 
@@ -110,7 +111,7 @@ levels(df_pulito$esercizi)
 levels(df_pulito$esercizi) <- c('no', 'si')
 
 levels(df_pulito$insulina)
-levels(df_pulito$insulina) <- c('falso', 'vero')
+levels(df_pulito$insulina) <- c('no', 'si')
 
 levels(df_pulito$dolore_petto)
 levels(df_pulito$dolore_petto) <- c('infarto', 'rischio infarto', 'dolore generico', 'asintomatico')
@@ -123,6 +124,9 @@ levels(df_pulito$inclinazione_grafico) <- c('salita', 'piatto', 'discesa')
 
 levels(df_pulito$obiettivo)
 levels(df_pulito$obiettivo) <- c('0', '1')
+
+levels(df_pulito_so$difetto)
+# viene gestito successivamente nell'analisi della variabile
 
 summary(df_pulito)
 
@@ -183,8 +187,9 @@ print(boxplotX(df_pulito, df_pulito$eta) +
 
 
 eta_valido <- replace(df_pulito$eta, 
-                      df_pulito$eta <= 1 | df_pulito$eta > 122, 
-                      mean(df_pulito$freq_cardiaca > 1 & df_pulito$freq_cardiaca <= 122))
+                      df_pulito$eta < 1 | df_pulito$eta > 122, 
+                      mean(df_pulito$eta[df_pulito$eta >= 1 &
+                                         df_pulito$eta <= 122]))
 
 print(boxplotX(df_pulito, eta_valido) +
         ggtitle('Distribuzione eta') +
@@ -199,13 +204,14 @@ print(boxplotX(df_pulito, eta_valido) +
 #---------------------------------------------------------------------
 
 
-print(boxplotX(df_pulito, df_pulito$pres_sangue_riposo) +
+print(boxplotX(df_pulito, df_pulito$press_sangue_riposo) +
         ggtitle('Distribuzione pressione sanguigna a riposo') +
         ylab('pressione sanguigna'))
 
-n_valido <- replace(df_pulito$pres_sangue_riposo, 
-                    df_pulito$pres_sangue_riposo <= 0 | df_pulito$pres_sangue_riposo > 230, 
-                    mean(df_pulito$pres_sangue_riposo > 0 & df_pulito$pres_sangue_riposo <= 230))
+n_valido <- replace(df_pulito$press_sangue_riposo, 
+                    df_pulito$press_sangue_riposo <= 0 | df_pulito$press_sangue_riposo > 230, 
+                    mean(df_pulito$press_sangue_riposo[df_pulito$press_sangue_riposo >= 1 &
+                                                       df_pulito$press_sangue_riposo <= 230]))
 
 
 print(boxplotX(df_pulito, n_valido)+
@@ -229,12 +235,11 @@ n_valido2 <- replace(
   df_pulito$freq_cardiaca_max, 
   df_pulito$freq_cardiaca_max <= 1 | df_pulito$freq_cardiaca_max > 222, 
   mean(df_pulito$freq_cardiaca_max[df_pulito$freq_cardiaca_max > 1 &
-                                     df_pulito$freq_cardiaca_max < 222])
-)
+                                     df_pulito$freq_cardiaca_max < 222]))
 
 print(boxplotX(df_pulito, n_valido2) +
         ggtitle('Distribuzione frequenza cardiaca massima registrata') +
-        ylab('frequenza cardiaca max')) # da aggiustare o chiedere al prof
+        ylab('frequenza cardiaca max')) 
 
 # i dati non vengono visulizzati se sono inconsistenti, come valori superiori 
 # a 222 
@@ -254,13 +259,13 @@ print(boxplotX(df_pulito, df_pulito$colesterolo) +
 # RIMOZIONE DEGLI OUTLIER
 #---------------------------------------------------------------------
 
-print(boxplotX(df_senza_outlier(df_pulito, df_pulito$pres_sangue_riposo),
-               df_senza_outlier(df_pulito, df_pulito$pres_sangue_riposo)$pres_sangue_riposo) +
+print(boxplotX(df_senza_outlier(df_pulito, df_pulito$press_sangue_riposo),
+               df_senza_outlier(df_pulito, df_pulito$press_sangue_riposo)$press_sangue_riposo) +
         ggtitle('Distribuzione pressione sanguigna a riposo senza outlier') +
         ylab('pressione sanguigna a riposo'))
 
 dim(df_pulito)
-df_pulito_so <- df_senza_outlier(df_pulito, df_pulito$pres_sangue_riposo)
+df_pulito_so <- df_senza_outlier(df_pulito, df_pulito$press_sangue_riposo)
 dim(df_pulito_so)
 
 print(boxplotX(df_senza_outlier(df_pulito_so, df_pulito_so$freq_cardiaca_max),
@@ -279,7 +284,6 @@ print(boxplotX(df_senza_outlier(df_pulito_so, df_pulito_so$eta),
 df_pulito_so <- df_senza_outlier(df_pulito_so, df_pulito_so$eta)
 dim(df_pulito_so)
 
-# forse da togliere
 print(boxplotX(df_senza_outlier(df_pulito_so, df_pulito_so$colesterolo),
                df_senza_outlier(df_pulito_so, df_pulito_so$colesterolo)$colesterolo) +
         ggtitle('Distribuzione tasso di colesterolo') +
@@ -293,13 +297,15 @@ print(boxplotX(df_senza_outlier(df_pulito_so, df_pulito_so$colesterolo),
 
 print(
   ggplot(df_pulito_so, aes(difetto)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8)
 )
 
 levels(df_pulito_so$difetto)
 
 # il numero di livelli di difetto e errato, da descrizione sono solamente 3,
-# pertanto rimuovo il livello errato, il primo con meno elementi
+# pertanto rimuovo il livello errato, il primo, quello con meno elementi
 
 df_pulito_so$difetto <- as.numeric(df_pulito_so$difetto)
 df_pulito_so$difetto[df_pulito_so$difetto == 1] <- NA 
@@ -311,7 +317,9 @@ levels(df_pulito_so$difetto) <- c('normale', 'difetto fisso', 'difetto reversibi
 
 print(
   ggplot(df_pulito_so, aes(difetto)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8)
 )
 
 #---------------------------------------------------------------------
@@ -320,7 +328,9 @@ print(
 
 print(
   ggplot(df_pulito_so, aes(dolore_petto)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8)
 )
 
 #---------------------------------------------------------------------
@@ -329,7 +339,9 @@ print(
 
 print(
   ggplot(df_pulito_so, aes(insulina)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8)
 )
 
 #---------------------------------------------------------------------
@@ -338,7 +350,9 @@ print(
 
 print(
   ggplot(df_pulito_so, aes(esercizi)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8)
 )
 #---------------------------------------------------------------------
 # ANALISI DEI VALORI DELLA VARIABILE ECG RIPOSO
@@ -346,7 +360,9 @@ print(
 
 print(
   ggplot(df_pulito_so, aes(ECG_riposo)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8)
 )
 #---------------------------------------------------------------------
 # ANALISI DEI VALORI DELLA VARIABILE INCLINAZIONE GRAFICO
@@ -354,7 +370,9 @@ print(
 
 print(
   ggplot(df_pulito_so, aes(inclinazione_grafico)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8)
 )
 #---------------------------------------------------------------------
 # ANALISI DEI VALORI DELLA VARIABILE SESSO
@@ -362,7 +380,9 @@ print(
 
 print(
   ggplot(df_pulito_so, aes(sesso)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8)
 )
 #---------------------------------------------------------------------
 # ANALISI DEI VALORI DELLA VARIABILE OBIETTIVO
@@ -370,7 +390,9 @@ print(
 
 print(
   ggplot(df_pulito_so, aes(obiettivo)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8) 
 )
 #---------------------------------------------------------------------
 # ANALISI DEI VALORI DELLA VARIABILE VASI COLORATI
@@ -378,7 +400,9 @@ print(
 
 print(
   ggplot(df_pulito_so, aes(vasi_sang_colorati)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8)
 )
 
 # dato che i vasi sanguigni colorati possono essere solamente 3 i valori superiori
@@ -390,7 +414,9 @@ df_pulito_so <- df_pulito_so %>%
 
 print(
   ggplot(df_pulito_so, aes(vasi_sang_colorati)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8) 
 )
 
 #---------------------------------------------------------------------
@@ -399,7 +425,9 @@ print(
 
 print(
   ggplot(df_pulito_so, aes(vecchi_picchi)) + 
-    geom_bar()
+    geom_bar(fill = '#ff8533', 
+             col = '#4d1f00',
+             alpha=0.8)
 )
 #---------------------------------------------------------------------
 # ANALISI DEI VALORI ID
@@ -446,9 +474,9 @@ print(eta_sex)
 
 ## distribuzione dei pazienti in base al sesso, eta e al tipo di ECG
 
-ecg_eta_sex <- ggplot(df_pulito_so, aes(ECG_riposo, eta, col = sesso)) + 
+ecg_eta_sex <- ggplot(df_pulito_so, aes(ECG_riposo, eta, fill = sesso)) + 
   geom_boxplot(
-    alpha=0.2
+    alpha=0.8
   ) +
   ggtitle('Distribuzione eta per esito ECG e sesso') +
   facet_grid(vars(sesso))
@@ -469,7 +497,7 @@ print(ecg_eta_sex)
 ## distribuzione delle modalita di dolore al petto per il sesso 
 
 sex_dolore <- ggplot(df_pulito_so, aes(dolore_petto, fill = sesso)) +
-  geom_bar() +
+  geom_bar(col = '#4d1f00') +
   facet_grid(vars(sesso)) +
   ggtitle('Distribuzione dolore al petto per sesso') 
 
@@ -484,7 +512,7 @@ print(sex_dolore)
 ## distribuzione delle modalita di esercizi per il sesso 
 
 sex_esercizi <- ggplot(df_pulito_so, aes(esercizi, fill = sesso)) +
-  geom_bar() +
+  geom_bar(col = '#4d1f00') +
   facet_grid(vars(sesso)) +
   ggtitle('Distribuzione esercizi per sesso') 
 
@@ -498,7 +526,7 @@ print(sex_esercizi)
 ## distribuzione dolore petto per esercizi
 
 dolore_esercizi <- ggplot(df_pulito_so, aes(dolore_petto, fill = dolore_petto)) +
-  geom_bar() +
+  geom_bar(col = '#4d1f00') +
   facet_grid(vars(esercizi)) +
   ggtitle('Dolore petto curato con esercizi') 
 
@@ -510,12 +538,12 @@ print(dolore_esercizi)
 
 #---------------------------------------------------------------------
 
-##
+## Distribuzione eta per numero di vasi sanguigni colorati
 
 vasi_eta_sex <- ggplot(df_pulito_so, aes(eta, fill = sesso)) +
-  geom_bar() +
+  geom_bar(alpha = 0.8) +
   facet_grid(vars(vasi_sang_colorati)) +
-  # da aggiungere la legenda dei vasi sanguigni colorati
+  theme(legend.position = 'top') +
   ggtitle('Distribuzione eta per numero di vasi sanguigni colorati') 
 
 print(vasi_eta_sex)
@@ -543,8 +571,8 @@ print(eta_col)
 #---------------------------------------------------------------------
 
 ## distribuzione colesterolo per pressione sanguigna a riposo
-pres_col <- ggplot(df_pulito_so, aes(colesterolo, pres_sangue_riposo)) +
-  geom_point() +
+pres_col <- ggplot(df_pulito_so, aes(colesterolo, press_sangue_riposo)) +
+  geom_point(col = '#ffa366') +
   labs(
     x = 'colesterolo mg/dl',
     y = 'pressione sangue a riposo mmHg'
@@ -557,8 +585,8 @@ print(pres_col)
 # a superare i 120 mmHg per i vari valori del colesterolo
 #---------------------------------------------------------------------
 ## distribuzione colesterolo per pressione sanguigna a riposo
-pres_col_sex <- ggplot(df_pulito_so, aes(colesterolo, pres_sangue_riposo, col = sesso)) +
-  geom_point() +
+pres_col_sex <- ggplot(df_pulito_so, aes(colesterolo, press_sangue_riposo, col = sesso)) +
+  geom_point(col = '#ffa366') +
   labs(
     x = 'colesterolo mg/dl',
     y = 'pressione sangue a riposo mmHg'
@@ -574,8 +602,8 @@ print(pres_col_sex)
 
 #---------------------------------------------------------------------
 ## distribuzione eta per pressione sanguigna a riposo
-pres_eta <- ggplot(df_pulito_so, aes(eta, pres_sangue_riposo)) +
-  geom_point() +
+pres_eta <- ggplot(df_pulito_so, aes(eta, press_sangue_riposo)) +
+  geom_point(col = '#ffa366') +
   labs(
     x = 'eta',
     y = 'pressione sangue a riposo mmHg'
@@ -590,7 +618,7 @@ print(pres_eta)
 #---------------------------------------------------------------------
 ## distribuzione eta per frequenza cardiaca massima
 fcm_eta <- ggplot(df_pulito_so, aes(eta, freq_cardiaca_max)) +
-  geom_point() +
+  geom_point(col = '#ffa366') +
   labs(
     x = 'eta',
     y = 'frequenza cardiaca massima'
@@ -605,7 +633,7 @@ print(fcm_eta)
 #---------------------------------------------------------------------
 ## distribuzione colesterolo per frequenza cardiaca massima
 col_fcm <- ggplot(df_pulito_so, aes(colesterolo, freq_cardiaca_max)) +
-  geom_point() +
+  geom_point(col = '#ffa366') +
   labs(
     x = 'colesterolo mg/dl',
     y = 'frequenza cardiaca massima'
@@ -630,38 +658,38 @@ library(ggcorrplot)
 ggcorrplot(round(cor(prova), 5))
 # questo grafico mostra le correlazioni tra le diverse variabili numeriche 
 
-cor(df_pulito_so$pres_sangue_riposo, df_pulito_so$colesterolo)
+cor(df_pulito_so$press_sangue_riposo, df_pulito_so$colesterolo)
 
 # la correlazione è bassa ~10% ma ricordiamo che anche una correlazione alta 
 # non implica casuazione e casualita, in questo caso avremo a che fare con una relazione con 
 # un alta varianza 
 
-# y = df_pulito_so$pres_sangue_riposo
+# y = df_pulito_so$press_sangue_riposo
 # x = df_pulito_so$colesterolo
 
 ## REGRESSIONE LINEARE
-reg <- lm(df_pulito_so$pres_sangue_riposo ~ df_pulito_so$colesterolo)
+reg <- lm(df_pulito_so$press_sangue_riposo ~ df_pulito_so$colesterolo)
 
 # grafico della regr. lineare 
-plot(df_pulito_so$pres_sangue_riposo ~ df_pulito_so$colesterolo,
+plot(df_pulito_so$press_sangue_riposo ~ df_pulito_so$colesterolo,
      ylab = 'pressione sangue a riposo (mmHg)', xlab = 'colesterolo (mg/dl)')
 title(main = "Regr.lin tra pressione sangue a riposo e colesterolo")
 abline (reg, col = "red")
 
 # si aggiungono i segmenti
-segments(df_pulito_so$colesterolo, fitted(reg), df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo,
+segments(df_pulito_so$colesterolo, fitted(reg), df_pulito_so$colesterolo, df_pulito_so$press_sangue_riposo,
          col = "blue", lty = 2)
 
 coef(reg)
-# pres_sangue_riposo = 125.60457 + 0.03191 * colesterolo
+# press_sangue_riposo = 125.60457 + 0.03191 * colesterolo
 summary(reg)
 
 # stima del modello utilizzando la formula I()
-reg2 <- lm(df_pulito_so$pres_sangue_riposo ~ I(df_pulito_so$colesterolo - mean(df_pulito_so$colesterolo)))
+reg2 <- lm(df_pulito_so$press_sangue_riposo ~ I(df_pulito_so$colesterolo - mean(df_pulito_so$colesterolo)))
 
 summary(reg2)
 # calcolo della r e R^2
-r <- cor(df_pulito_so$colesterolo, df_pulito_so$pres_sangue_riposo)
+r <- cor(df_pulito_so$colesterolo, df_pulito_so$press_sangue_riposo)
 r
 r^2
 # 0.009215276 denota che la varianza dei residui è molto alta e indica un cattivo
@@ -682,7 +710,7 @@ qqline(reg$residuals)
 # sia sopra che sotto
 
 
-reg <- lm(pres_sangue_riposo ~ colesterolo, data = df_pulito_so)
+reg <- lm(press_sangue_riposo ~ colesterolo, data = df_pulito_so)
 
 # previsione sui dati non presenti nel df
 
@@ -718,7 +746,7 @@ reg <- lm(df_pulito_so$eta ~ df_pulito_so$freq_cardiaca_max)
 # grafico della regr. lineare 
 plot(df_pulito_so$eta ~ df_pulito_so$freq_cardiaca_max,
      xlab = 'frequenza cardiaca max (bpm)', ylab = 'eta')
-title(main = "Regr.lin tra eta e frequenza cardiaca max")
+title(main = "Regr.lin tra età e frequenza cardiaca max")
 abline (reg, col = "red")
 
 # si aggiungono i segmenti
