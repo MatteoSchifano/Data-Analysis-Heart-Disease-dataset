@@ -1176,3 +1176,22 @@ fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl 
 
 results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
 summary(results)
+
+#---------------------------------------------------------------------
+# prova con algoritmo RFE consigliato dal prof
+
+set.seed(100)
+options(warn=-1)
+
+subsets <- c(10, 15, 18)
+
+ctrl <- rfeControl(functions = rfFuncs,
+                   method = "repeatedcv",
+                   repeats = 5,
+                   verbose = FALSE)
+
+lmProfile <- rfe(x=ml[, c(2:14)], y=ml$obiettivo,
+                 sizes = subsets,
+                 rfeControl = ctrl)
+
+lmProfile
