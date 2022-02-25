@@ -133,7 +133,7 @@ summary(df_pulito)
 #---------------------------------------------------------------------
 ## Trasformare i dati in modo che siano CONSISTENTI:
 
-# 1) la frequenza cardiaca superiore a 222 e inferiore e inferiore a 0 verra' 
+# 1) la frequenza cardiaca superiore a 222 e inferiore a 0 verra' 
 # rimpiazzata dalla media
 library(ggplot2)
 
