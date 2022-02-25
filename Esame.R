@@ -1048,7 +1048,7 @@ nrow(test_set)
 
 
 seed = set.seed(2022)
-control <- trainControl(method = "cv", number = 10, seed = seed)
+control <- trainControl(method = "cv", number = 25, seed = seed)
 metric <- "Accuracy"
 
 
@@ -1086,7 +1086,7 @@ nrow(test_set)
 
 
 seed = set.seed(2022)
-control <- trainControl(method = "cv", number = 10, seed = seed)
+control <- trainControl(method = "cv", number = 25, seed = seed)
 metric <- "Accuracy"
 
 
@@ -1124,7 +1124,7 @@ nrow(test_set)
 
 
 seed = set.seed(2022)
-control <- trainControl(method = "cv", number = 10, seed = seed)
+control <- trainControl(method = "cv", number = 25, seed = seed)
 metric <- "Accuracy"
 
 
@@ -1161,7 +1161,7 @@ nrow(test_set)
 
 
 seed = set.seed(2022)
-control <- trainControl(method = "cv", number = 10, seed = seed)
+control <- trainControl(method = "cv", number = 25, seed = seed)
 metric <- "Accuracy"
 
 
