@@ -133,7 +133,7 @@ summary(df_pulito)
 #---------------------------------------------------------------------
 ## Trasformare i dati in modo che siano CONSISTENTI:
 
-# 1) la frequenza cardiaca superiore a 222 e inferiore a 0 verra' 
+# 1) la frequenza cardiaca superiore a 222 e inferiore e inferiore a 0 verra' 
 # rimpiazzata dalla media
 library(ggplot2)
 
@@ -658,8 +658,9 @@ fcm_eta <- ggplot(df_pulito_so, aes(eta, freq_cardiaca_max)) +
 
 
 print(fcm_eta)
-# si nota che, tendenzialmente, con l'aumentare dell'età
-# la frequenza cardiaca massima diminuisce
+#
+#
+#
 #---------------------------------------------------------------------
 ## distribuzione colesterolo per frequenza cardiaca massima
 col_fcm <- ggplot(df_pulito_so, aes(colesterolo, freq_cardiaca_max)) +
@@ -832,6 +833,8 @@ predict(reg,
 # ANALISI CON ALGORITMO DEL GRADIENTE
 #---------------------------------------------------------------------
 
+coef(reg)
+
 n <- 1000
 x <- rnorm(n)
 # freq_cardiaca_max =  69.14204 - 0.10663 * eta
@@ -867,7 +870,7 @@ mse(a = coef(sim_ols)[1], b = coef(sim_ols)[2])
 
 mean(resid(sim_ols)^2)
 
-grid <- expand.grid(a = seq(60, 80, 0.1), b = seq(-5, 5, 0.1)) %>% 
+grid <- expand.grid(a = seq(55, 70, 0.1), b = seq(-5, 5, 0.1)) %>% 
   as_tibble()
 grid
 
@@ -905,11 +908,13 @@ gd_step <- function(a, b,
 }
 
 walk <- gd_step(0, 0)
-walk
 
+# si tiene traccia del tempo che impiega l'algoritmo
+Sys.time()
 for(i in 1:25) {
   walk <- gd_step(walk[1], walk[2])
 }
+Sys.time()
 walk
 
 estimate_gradient <- function(pars_tbl, learning_rate = 0.1, x = sim_d$x, y = sim_d$y) {
@@ -979,12 +984,17 @@ grad <- estimate_gradient(tibble(a = 0, b = 0))
 
 # loop through
 i <- 2
+
+# si tiene traccia del tempo che impiega l'algoritmo
+Sys.time()
 while(abs(mse_new - mse_old) > epsilon & i <= iteration) {
   grad[i, ] <- estimate_gradient(grad[i - 1, ])
   mse_old <- grad[i - 1, ncol(grad)]
   mse_new <- grad[i, ncol(grad)]
   i = i + 1
 }
+Sys.time()
+
 grad
 
 grad <- grad %>% 
@@ -1052,18 +1062,23 @@ metric <- "Accuracy"
 
 
 # linear algorithms
+# si tiene traccia del tempo che impiega l'algoritmo
+Sys.time()
 fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "lda")
-
+Sys.time()
 ## CART
 fit_cart <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "rpart")
-
 ## KNN
 fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "knn")
+## MLP
+fit_mlp <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "mlp")
 
-results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
+results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn, mlp = fit_mlp))
 summary(results)
 
-
+# misurazione dell'accuratezza sul test_set
+predictions <- predict(fit_lda, test_set)
+confusionMatrix(predictions, test_set$obiettivo)
 
 #---------------------------------------------------------------------
 ## Prova 2 solo valori numerici
@@ -1098,7 +1113,9 @@ fit_cart <- train(obiettivo ~ ., data = training_set, metric = metric, trControl
 ## KNN
 fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "knn")
 
-results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
+fit_mlp <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "mlp")
+
+results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn, mlp = fit_mlp))
 summary(results)
 
 
@@ -1136,14 +1153,16 @@ fit_cart <- train(obiettivo ~ ., data = training_set, metric = metric, trControl
 ## KNN
 fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "knn")
 
-results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
+fit_mlp <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "mlp")
+
+results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn, mlp = fit_mlp))
 summary(results)
 
 
 #---------------------------------------------------------------------
-## Prova 4 
+## Prova 4 solo fattori
 
-x <- ml[, c(2, 3, 4, 5, 6, 7, 8, 10, 13, 15)]
+x <- ml[, c( 3, 4, 7, 8, 10, 12, 14, 15)]
 dim(x)
 y <- ml[, 15]
 dim(t(y))
@@ -1173,14 +1192,16 @@ fit_cart <- train(obiettivo ~ ., data = training_set, metric = metric, trControl
 ## KNN
 fit_knn <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "knn")
 
-results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn))
+fit_mlp <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "mlp")
+
+results <- resamples(list(lda = fit_lda, cart = fit_cart, knn = fit_knn, mlp = fit_mlp))
 summary(results)
 
 #---------------------------------------------------------------------
-# prova con algoritmo RFE consigliato dal prof
+## Prova 5 utilizzo del rfe
 
-set.seed(100)
-options(warn=-1)
+set.seed(2022)
+options(warn = -1)
 
 subsets <- c(10, 15, 18)
 
@@ -1188,9 +1209,20 @@ ctrl <- rfeControl(functions = rfFuncs,
                    method = "repeatedcv",
                    repeats = 5,
                    verbose = FALSE)
-
-lmProfile <- rfe(x=ml[, c(2:14)], y=ml$obiettivo,
+# si tiene traccia del tempo che impiega l'algoritmo
+Sys.time()
+lmProfile <- rfe(x = ml[, c(2:14)], y = ml$obiettivo,
                  sizes = subsets,
                  rfeControl = ctrl)
+Sys.time()
 
 lmProfile
+#---------------------------------------------------------------------
+## CONSIDERAZIONI FINALI
+#---------------------------------------------------------------------
+
+# il tempo per la creazione del modello preso in considerazione (LDA)
+# e il tempo di esecuzione degli algoritmi di forza bruta e del gradiente 
+# è pressochè 0 mentre gli algoritmi come ad esempio RFE impiega circa ~10 s
+# Questi dati sono relativi a un MSI Creator p100x
+
