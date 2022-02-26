@@ -658,9 +658,8 @@ fcm_eta <- ggplot(df_pulito_so, aes(eta, freq_cardiaca_max)) +
 
 
 print(fcm_eta)
-#
-#
-#
+# si nota che, tendenzialmente, con l'aumentare dell'età
+# la frequenza cardiaca massima diminuisce
 #---------------------------------------------------------------------
 ## distribuzione colesterolo per frequenza cardiaca massima
 col_fcm <- ggplot(df_pulito_so, aes(colesterolo, freq_cardiaca_max)) +
