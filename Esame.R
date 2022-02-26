@@ -558,18 +558,6 @@ print(vasi_eta_sex)
 
 #---------------------------------------------------------------------
 
-##  DA RIVEDERE
-
-n_classi <- 4
-differenza <- max(df_pulito_so$eta) - min(df_pulito_so$eta)
-elementiXclasse <- differenza/n_classi
-
-eta_col <- ggplot(df_pulito_so, aes(x = '', colesterolo)) +
-  geom_boxplot(data = seq(min(df_pulito_so$eta), max(df_pulito_so$eta), elementiXclasse))
-print(eta_col)
-#
-#---------------------------------------------------------------------
-
 ## distribuzione sani e malati per eta
 
 target_age <- ggplot(df_pulito_so, aes(eta)) +
