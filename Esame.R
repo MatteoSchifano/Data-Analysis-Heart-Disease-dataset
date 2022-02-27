@@ -912,10 +912,10 @@ estimate_gradient <- function(pars_tbl, learning_rate = 0.1, x = sim_d$x, y = si
   tibble(a = pars[1], b = pars[2], mse = mse(a, b, x, y))
 }
 
-# initialize
+# si inizializza
 grad <- estimate_gradient(tibble(a = 0, b = 0))
 
-# loop through
+# si costruisce il ciclo
 for(i in 2:50) {
   grad[i, ] <- estimate_gradient(grad[i - 1, ])
 }
@@ -960,16 +960,16 @@ animate(anim)
 # l'algoritmo di forza bruta fa riferimento ai dati e al pre processing di questi 
 # ultimi dell'algoritmo del 
 
-# if the difference between mse_old and mse_new is smaller than the epsilon value (or if the maximum number of iterations is reached), then the algorithm will halt
+# se la differenza tra mse_old e mse_new e piu piccola di epsilon (o se viene raggiunto il numero massimo di iterazioni), l'algoritmo si ferma
 mse_old <- 0
 mse_new <- .1
 epsilon <- .0005
 iteration <- 50
 
-# initialize
+# si inizializza
 grad <- estimate_gradient(tibble(a = 0, b = 0))
 
-# loop through
+# si costruisce il ciclo
 i <- 2
 
 # si tiene traccia del tempo che impiega l'algoritmo
@@ -1033,12 +1033,12 @@ y <- ml[, 15]
 dim(t(y))
 
 set.seed(2022)
-# create a matrix of 80% of the rows in the original dataset that we can use for training
+# si crea una matrice contenente l'80% dei valori del dataset, da usare come allenamento
 training_index <- createDataPartition(y, p = .80, list = FALSE)
-# select 80% of data to training the models
+# si seleziona l'80% dei dati
 training_set <- x[training_index, ]
 nrow(training_set)
-# use the remaining 20% of the data for test
+# si usa il restante 20% dei dati per effettuare i test 
 test_set <- x[-training_index, ]
 nrow(test_set)
 
@@ -1048,7 +1048,7 @@ control <- trainControl(method = "cv", number = 25, seed = seed)
 metric <- "Accuracy"
 
 
-# linear algorithms
+# algoritmi lineari
 # si tiene traccia del tempo che impiega l'algoritmo
 Sys.time()
 fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "lda")
@@ -1076,12 +1076,12 @@ y <- ml[, 15]
 dim(t(y))
 
 set.seed(2022)
-# create a matrix of 80% of the rows in the original dataset that we can use for training
+# si utilizza l'80% dei dati per l'allenamento e il 20% per il test
 training_index <- createDataPartition(y, p = .80, list = FALSE)
-# select 80% of data to training the models
+
 training_set <- x[training_index, ]
 nrow(training_set)
-# use the remaining 20% of the data for test
+
 test_set <- x[-training_index, ]
 nrow(test_set)
 
@@ -1091,7 +1091,7 @@ control <- trainControl(method = "cv", number = 25, seed = seed)
 metric <- "Accuracy"
 
 
-# linear algorithms
+# algoritmi lineari
 fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "lda")
 
 ## CART
@@ -1116,12 +1116,12 @@ y <- ml[, 15]
 dim(t(y))
 
 set.seed(2022)
-# create a matrix of 80% of the rows in the original dataset that we can use for training
+# si utilizza l'80% dei dati per l'allenamento e il 20% per il test
 training_index <- createDataPartition(y, p = .80, list = FALSE)
-# select 80% of data to training the models
+
 training_set <- x[training_index, ]
 nrow(training_set)
-# use the remaining 20% of the data for test
+
 test_set <- x[-training_index, ]
 nrow(test_set)
 
@@ -1131,7 +1131,7 @@ control <- trainControl(method = "cv", number = 25, seed = seed)
 metric <- "Accuracy"
 
 
-# linear algorithms
+# algoritmi lineari
 fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "lda")
 
 ## CART
@@ -1155,12 +1155,12 @@ y <- ml[, 15]
 dim(t(y))
 
 set.seed(2022)
-# create a matrix of 80% of the rows in the original dataset that we can use for training
+# si utilizza l'80% dei dati per l'allenamento e il 20% per il test
 training_index <- createDataPartition(y, p = .80, list = FALSE)
-# select 80% of data to training the models
+
 training_set <- x[training_index, ]
 nrow(training_set)
-# use the remaining 20% of the data for test
+
 test_set <- x[-training_index, ]
 nrow(test_set)
 
@@ -1170,7 +1170,7 @@ control <- trainControl(method = "cv", number = 25, seed = seed)
 metric <- "Accuracy"
 
 
-# linear algorithms
+# algoritmi lineari
 fit_lda <- train(obiettivo ~ ., data = training_set, metric = metric, trControl = control, method = "lda")
 
 ## CART
