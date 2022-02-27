@@ -485,7 +485,7 @@ ecg_eta_sex <- ggplot(df_pulito_so, aes(ECG_riposo, eta, fill = sesso)) +
 print(ecg_eta_sex)
 
 # l'eta media femminile con un ECG a riposo normale si concentra tra i 50 e i 
-# 60 anni con pochi; la donna piu giovane ha un ECG anormale. Lo scarto interquantile
+# 60 anni; la donna piu giovane ha un ECG anormale. Lo scarto interquantile
 # femminile di chi registra un ECG anormale e elevato. l'unica donna
 # che soffre di ipretrofia ventricolare sx ha 55 anni circa. 
 # Per quanto riguarda gli uomini rileviamo scarti interquantili pittosto ristretti
