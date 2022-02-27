@@ -142,7 +142,7 @@ library(ggplot2)
 #---------------------------------------------------------------------
 
 
-vaI <- function(x){
+vaI <- function(x) {
   val <- quantile(x)[2] - 1.5 * (quantile(x)[4] - quantile(x)[2])
   return(val)
 }
@@ -152,14 +152,14 @@ vaS <- function(x){
   return(val)
 }
 
-df_senza_outlier <- function(df_pulito, x){
+df_senza_outlier <- function(df_pulito, x) {
   df <-
     df_pulito[x >= vaI(x) &
                 x <= vaS(x), ]
   return(df)
 }
 
-boxplotX <- function(df, y){
+boxplotX <- function(df, y) {
   
   grafico <- ggplot(df %>% drop_na(), aes(x = '', y = y)) +
     geom_boxplot(
@@ -578,7 +578,7 @@ print(target_age)
 target_age_sex <- ggplot(df_pulito_so, aes(eta)) +
   geom_density(aes(fill = obiettivo), alpha = 0.5) +
   facet_grid(vars(sesso)) +
-  ggtitle('Distribuzione eta per sani e malati') 
+  ggtitle('Distribuzione eta per sani e malati e sesso') 
 
 
 print(target_age_sex)
