@@ -534,8 +534,8 @@ dolore_esercizi <- ggplot(df_pulito_so, aes(dolore_petto, fill = dolore_petto)) 
 print(dolore_esercizi)
 
 # comprendiamo che chi svolge esercizi e prevalentemente chi ha registrato un
-# infarto o soffre di un dolore generico. Si notano anche molti infarti e rischi
-# infarto che non vengono curati con esercizi
+# infarto o soffre di un dolore generico. Si notano anche molti infarti, rischi
+# infarto e dolori generici che non vengono curati con esercizi
 
 #---------------------------------------------------------------------
 
