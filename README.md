@@ -76,20 +76,25 @@ Prendiamo in considerazione qualche grafico e diamogli un’occhiata:
 Come si può notare qua sotto abbiamo il grafico della distribuzione dell'età. Notiamo che in questo boxplot abbiamo degli outlier, che sono dei dati inconsistenti.
 
 PRIMA
+
 ![grafico1-prima](img/g1-prima.png "Distribuzione età")
+
 Gli outlier inconsistenti, infatti, sono stati eliminati, poiché non esiste, ad esempio, una persona che abbia l’età minore di 0.
 
 DOPO
+
 ![grafico1-dopo](img/g1-dopo.png "Distribuzione età")
 
 Ora vediamo un’altro grafico, in questo caso abbiamo un istogramma che rappresenta la colorazione dei vasi sanguigni tramite la fluoroscopia.
 PRIMA
+
 ![grafico2-prima](img/g2-prima.png)
 
 
 Che cosa è cambiato dall'istogramma di PRIMA?
 Ricordiamo che il valore della colorazione dei vasi sanguigni varia da 0 a 3 mentre nel grafico di PRIMA abbiamo una colonna “4”; questo lo rende un dato errato, quindi è stato eliminato.
 DOPO
+
 ![grafico2-dopo](img/g2-dopo.png)
 
  
@@ -99,6 +104,7 @@ Ora procediamo con l’analisi di alcuni dei principali grafici che abbiamo cost
 
 1. 
 ![grafico3](img/g3.png)
+
 Notiamo come mediamente i pazienti maschili siano più giovani delle donne infatti lo scarto interquartile delle donne è maggiore di quello maschile, VAS e VAI femminili si discostano di meno dallo scarto interquartile rispetto alle registrazioni prese sui maschi.
 
 
@@ -113,6 +119,7 @@ l'età media femminile con un ECG a riposo normale si concentra tra i 50 e i 60 
 
 3. 
 ![grafico5](img/g5.png)
+
 Dal grafico si evince che, con l'aumentare dell'età, le persone tendono ad avere meno patologie cardiache.. La differenza tra sani e malati si può notare soprattutto nel grafico femminile.
 
 
@@ -121,8 +128,9 @@ Dal grafico si evince che, con l'aumentare dell'età, le persone tendono ad aver
 
 
 
-4. 
+5. 
 ![grafico6](img/g6.png)
+
 Da questa rappresentazione grafica comprendiamo che chi svolge esercizi è prevalentemente chi ha registrato un infarto o soffre di un dolore generico. Si notano anche molti infarti, rischi infarto e dolori generici che non vengono curati con esercizi.
 
 
@@ -132,7 +140,7 @@ Da questa rappresentazione grafica comprendiamo che chi svolge esercizi è preva
 
 
 
-5. 
+6. 
 ![grafico7](img/g7.png)
 Quest’ultimo grafico rappresenta la tabella di correlazione tra le variabili numeriche. Una correlazione alta rispetto alle altre, ad esempio, è quella tra vasi_sangu_colorati e età mentre è molto bassa quella tra vecchi_picchi e frq_cardiaca_max. 
 
@@ -140,20 +148,24 @@ Quest’ultimo grafico rappresenta la tabella di correlazione tra le variabili n
 ## 5. Regressione lineare
 
 Per lo sviluppo della regressione lineare, abbiamo scelto inizialmente di osservare se era presente una relazione tra pressione sanguigna a riposo e colesterolo. Il risultato ottenuto è il seguente:
+
 ![grafico8](img/g8.png)
 
 Siccome la correlazione risulta molto bassa (circa 10%) e la varianza della relazione alta, abbiamo successivamente deciso di cambiare le variabili ed effettuare un’altra analisi della relazione, optando questa volta per età e frequenza cardiaca massima. Questa volta abbiamo ottenuto il seguente grafico:
+
 ![grafico9](img/g9.png)
 
 
 La correlazione ottenuta questa volta è circa -30%, 3 volte superiore a quella del grafico precedente. Anche se si ha comunque un’alta dispersione, si può comunque notare che generalmente all’aumentare dell’età diminuisce la frequenza cardiaca massima, fenomeno ulteriormente verificato dall’analisi effettuata precedentemente sul plot tra le medesime variabili.
 L’R2 ottenuto è comunque basso, 0.086, ma è migliore di quello della relazione tra colesterolo e pressione a riposo.
 Successivamente, analizzando i residui, si può affermare che l’ipotesi di distribuzione casuale dei residui è verificata, in quanto essi risultano presenti sia sopra che sotto la retta.
+
 ![grafico10](img/g10.png)
  
 
  
 Infine abbiamo costruito il grafico relativo alla distribuzione in quantili:
+
 ![grafico11](img/g11.png)
 
 Anche il grafico dei quantili verifica l’ipotesi di distribuzione casuale dei valori poiché si distribuiscono sia sopra che sotto la linea.
@@ -185,9 +197,9 @@ Il tempo impiegato dalla macchina per la creazione del modello varia a seconda d
 Le ultime considerazioni che da fare sono le misurazioni dell’accuratezza effettiva del nostro test set, i risultati sono: 
 ```
 Confusion Matrix and Statistics
-Prediction	          Sano	Problema cardiaco
-  Sano	              15	        3
-  Problema cardiaco   5	           21
+Prediction	        Sano	     Problema cardiaco
+Sano	               15	              3
+Problema cardiaco    5	             21
                                       	
 Accuracy : 0.8182      	
 Kappa : 0.6303                	
